@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import weakref
 from dataclasses import dataclass
+from functools import lru_cache
+from itertools import accumulate
 from typing import Dict, List
 
 import torch
@@ -15,6 +17,24 @@ from minisgl.kernel.triton.causal_conv1d import (
 from minisgl.kernel.triton.gdn_decode import packed_decode as gdn_packed_decode
 
 from .base import BaseAttnBackend
+
+
+@lru_cache(maxsize=1)
+def _load_sglang_prefill_kernels():
+    """Load the optimized SGLang prefill kernels when they are installed.
+
+    Mini-SGLang remains usable as a standalone project: environments without
+    the SGLang kernel package keep using the recurrent prefill implementation.
+    """
+    try:
+        from sglang.kernels.ops.attention.fla.chunk import chunk_gated_delta_rule
+        from sglang.kernels.ops.attention.fla.fused_gdn_gating import (
+            fused_gdn_gating,
+        )
+        from sglang.kernels.ops.mamba.causal_conv1d_triton import causal_conv1d_fn
+    except (ImportError, ModuleNotFoundError):
+        return None
+    return causal_conv1d_fn, fused_gdn_gating, chunk_gated_delta_rule
 
 
 @dataclass
@@ -176,7 +196,9 @@ class GDNAttnBackend:
         state_i32 = self._capture_state_indices_i32.get(bs)
         reqs = getattr(batch, "padded_reqs", batch.reqs)
         if state_i32 is None:
-            state_i32 = torch.empty(bs, dtype=torch.int32, device=get_global_ctx().page_table.device)
+            state_i32 = torch.empty(
+                bs, dtype=torch.int32, device=get_global_ctx().page_table.device
+            )
             self._capture_state_indices_i32[bs] = state_i32
         for i, req in enumerate(reqs):
             state_i32[i] = req.table_idx
@@ -241,6 +263,82 @@ class GDNAttnBackend:
             offset += length
         return conv_qkv
 
+    def _apply_conv_batch_sglang(
+        self,
+        mixed_qkv: torch.Tensor,
+        conv_weight: torch.Tensor,
+        rt: _LayerRuntime,
+        causal_conv1d_fn,
+        prefill_metadata,
+    ) -> torch.Tensor:
+        """Run SGLang's variable-length causal-conv prefill kernel."""
+        query_start_loc, state_indices, has_initial_state, extend_lens = prefill_metadata
+        weight_2d = conv_weight.squeeze(1) if conv_weight.ndim == 3 else conv_weight
+        return causal_conv1d_fn(
+            mixed_qkv.transpose(0, 1),
+            weight_2d.contiguous(),
+            None,
+            conv_states=rt.conv_cache,
+            query_start_loc=query_start_loc,
+            seq_lens_cpu=extend_lens,
+            cache_indices=state_indices,
+            has_initial_state=has_initial_state,
+            activation="silu",
+        ).transpose(0, 1)
+
+    def _forward_extend_sglang(
+        self,
+        conv_qkv: torch.Tensor,
+        a: torch.Tensor,
+        b: torch.Tensor,
+        layer,
+        rt: _LayerRuntime,
+        fused_gdn_gating,
+        chunk_gated_delta_rule,
+        prefill_metadata,
+    ) -> torch.Tensor:
+        """Run SGLang's FLA chunk GDN kernel over packed variable-length input."""
+        query, key, value = torch.split(
+            conv_qkv,
+            [layer.q_dim, layer.k_dim, layer.v_dim],
+            dim=-1,
+        )
+        total_tokens = conv_qkv.shape[0]
+        query = query.view(1, total_tokens, layer.num_q_heads, layer.head_q_dim)
+        key = key.view(1, total_tokens, layer.num_k_heads, layer.head_k_dim)
+        value = value.view(1, total_tokens, layer.num_v_heads, layer.head_v_dim)
+
+        g, beta = fused_gdn_gating(layer.A_log, a, b, layer.dt_bias)
+        query_start_loc, state_indices, _, _ = prefill_metadata
+        core, _, _ = chunk_gated_delta_rule(
+            q=query,
+            k=key,
+            v=value,
+            g=g,
+            beta=beta,
+            scale=layer.head_k_dim**-0.5,
+            initial_state=rt.ssm_cache,
+            initial_state_indices=state_indices,
+            cu_seqlens=query_start_loc,
+            head_first=False,
+            use_qk_l2norm_in_kernel=True,
+        )
+        return core
+
+    def _get_sglang_prefill_metadata(self, reqs, forward_batch, device):
+        metadata = getattr(forward_batch, "_gdn_prefill_metadata", None)
+        if metadata is not None:
+            return metadata
+        extend_lens = [req.extend_len for req in reqs]
+        metadata = (
+            torch.tensor([0, *accumulate(extend_lens)], dtype=torch.int32, device=device),
+            torch.tensor([req.table_idx for req in reqs], dtype=torch.int32, device=device),
+            torch.tensor([req.cached_len > 0 for req in reqs], dtype=torch.bool, device=device),
+            extend_lens,
+        )
+        forward_batch._gdn_prefill_metadata = metadata
+        return metadata
+
     def _apply_conv_decode_batch(
         self,
         mixed_qkv: torch.Tensor,
@@ -263,9 +361,7 @@ class GDNAttnBackend:
                 if hist_len == 1:
                     updated_hist = mixed_qkv.unsqueeze(-1)
                 else:
-                    updated_hist = torch.cat(
-                        [conv_hist[:, :, 1:], mixed_qkv.unsqueeze(-1)], dim=-1
-                    )
+                    updated_hist = torch.cat([conv_hist[:, :, 1:], mixed_qkv.unsqueeze(-1)], dim=-1)
                 rt.conv_cache.index_copy_(0, slots, updated_hist)
             return out
 
@@ -361,6 +457,30 @@ class GDNAttnBackend:
             raise ValueError("A_log/dt_bias are required in RadixLinearAttention.")
 
         rt = self._ensure_runtime(layer, mixed_qkv)
+        sglang_kernels = _load_sglang_prefill_kernels() if mixed_qkv.is_cuda else None
+        if sglang_kernels is not None:
+            causal_conv1d_fn, fused_gdn_gating, chunk_gated_delta_rule = sglang_kernels
+            prefill_metadata = self._get_sglang_prefill_metadata(
+                reqs, forward_batch, mixed_qkv.device
+            )
+            conv_qkv = self._apply_conv_batch_sglang(
+                mixed_qkv,
+                conv_weight,
+                rt,
+                causal_conv1d_fn,
+                prefill_metadata,
+            )
+            return self._forward_extend_sglang(
+                conv_qkv,
+                a,
+                b,
+                layer,
+                rt,
+                fused_gdn_gating,
+                chunk_gated_delta_rule,
+                prefill_metadata,
+            )
+
         conv_qkv = self._apply_conv_batch(mixed_qkv, reqs, conv_weight, rt)
         out = torch.empty(
             conv_qkv.shape[0],
