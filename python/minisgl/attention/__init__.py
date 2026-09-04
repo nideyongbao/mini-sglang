@@ -56,16 +56,28 @@ def create_attention_backend(
     validate_attn_backend(backend, allow_auto=False)
     if "," in backend:
         assert backend.count(",") == 1, "Only one comma is allowed in hybrid backend"
-        p_backend, d_backend = backend.split(",", 1)
-        if p_backend != d_backend:
-            logger.info(f"Using hybrid attention backend: prefill={p_backend}, decode={d_backend}")
-            p_backend = create_attention_backend(p_backend, config)
-            d_backend = create_attention_backend(d_backend, config)
-            return HybridBackend(p_backend, d_backend)
-        backend = p_backend  # both are the same, fall through to single backend
-        logger.warning(f"P/D attention backends are the same: {backend}, using single backend.")
+        prefill_name, decode_name = backend.split(",", 1)
+        if prefill_name != decode_name:
+            logger.info(
+                f"Using hybrid attention backend: prefill={prefill_name}, decode={decode_name}"
+            )
+            # Compose the prefill/decode dispatch before adding the linear-attention
+            # dispatch. Hybrid models must have one GDN backend because its conv and
+            # recurrent states are carried from prefill into decode. Wrapping each
+            # full-attention backend independently would create two state owners.
+            ret = HybridBackend(
+                SUPPORTED_ATTENTION_BACKENDS[prefill_name](config),
+                SUPPORTED_ATTENTION_BACKENDS[decode_name](config),
+            )
+        else:
+            backend = prefill_name
+            logger.warning(
+                f"P/D attention backends are the same: {backend}, using single backend."
+            )
+            ret = SUPPORTED_ATTENTION_BACKENDS[backend](config)
+    else:
+        ret = SUPPORTED_ATTENTION_BACKENDS[backend](config)
 
-    ret = SUPPORTED_ATTENTION_BACKENDS[backend](config)
     if config.has_linear_layers:
         from .gdn import HybridLinearBackend
 
