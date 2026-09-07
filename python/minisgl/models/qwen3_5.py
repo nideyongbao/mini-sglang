@@ -3,10 +3,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Tuple
 
 import torch
-import torch.nn.functional as F
 from minisgl.compilation import get_forward_context
 from minisgl.core import get_global_ctx
 from minisgl.distributed import get_tp_info
+from minisgl.kernel.triton.qwen35_fused import gated_rmsnorm_
 from minisgl.layers import (
     BaseOP,
     GemmaRMSNormFused,
@@ -17,9 +17,6 @@ from minisgl.layers import (
     RMSNorm,
     RadixLinearAttention,
     VocabParallelEmbedding,
-)
-from minisgl.kernel.triton.gdn_fused_proj import (
-    fused_qkvzba_split_reshape_cat_contiguous,
 )
 from minisgl.utils import div_even, nvtx_annotate
 
@@ -130,46 +127,22 @@ class Qwen3_5GatedDeltaNet(BaseOP):
             has_bias=False,
         )
 
-    def fix_query_key_value_ordering(
+    def _unpack_input_projections(
         self,
         mixed_qkvz: torch.Tensor,
         mixed_ba: torch.Tensor,
-    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
-        query, key, value, z = mixed_qkvz.split(
-            [self.local_qk_dim, self.local_qk_dim, self.local_v_dim, self.local_v_dim], dim=-1
+    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+        mixed_qkv, z = mixed_qkvz.split(
+            [self.local_conv_dim, self.local_v_dim], dim=-1
         )
         b, a = mixed_ba.split([self.num_v_heads, self.num_v_heads], dim=-1)
-        value = value.view(value.shape[0], self.num_v_heads, self.head_v_dim)
         z = z.view(z.shape[0], self.num_v_heads, self.head_v_dim)
-        return query, key, value, z, b, a
+        return mixed_qkv, z, b, a
 
     def _forward_input_proj(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
         projected_states_qkvz = self.in_proj_qkvz.forward(x)
         projected_states_ba = self.in_proj_ba.forward(x)
         return projected_states_qkvz, projected_states_ba
-
-    def _fused_input_reorder(
-        self,
-        projected_states_qkvz: torch.Tensor,
-        projected_states_ba: torch.Tensor,
-    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor] | None:
-        if not projected_states_qkvz.is_cuda:
-            return None
-        if self.num_v_heads % self.num_q_heads != 0:
-            return None
-        if (self.num_v_heads // self.num_q_heads) not in (1, 2, 4):
-            return None
-        try:
-            return fused_qkvzba_split_reshape_cat_contiguous(
-                projected_states_qkvz,
-                projected_states_ba,
-                self.num_q_heads,
-                self.num_v_heads,
-                self.head_k_dim,
-                self.head_v_dim,
-            )
-        except Exception:
-            return None
 
     @nvtx_annotate("GatedDeltaNet")
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -177,16 +150,9 @@ class Qwen3_5GatedDeltaNet(BaseOP):
         forward_batch = forward_ctx.forward_batch if forward_ctx is not None else None
 
         projected_states_qkvz, projected_states_ba = self._forward_input_proj(x)
-        fused_out = self._fused_input_reorder(projected_states_qkvz, projected_states_ba)
-        if fused_out is None:
-            query, key, value, z, b, a = self.fix_query_key_value_ordering(
-                projected_states_qkvz, projected_states_ba
-            )
-            mixed_qkv = torch.cat((query, key, value.reshape(value.shape[0], -1)), dim=-1)
-        else:
-            mixed_qkv, z, b, a = fused_out
-        b = b.contiguous()
-        a = a.contiguous()
+        mixed_qkv, z, b, a = self._unpack_input_projections(
+            projected_states_qkvz, projected_states_ba
+        )
 
         # Keep RadixLinearAttention references aligned after state_dict loading.
         self.attn.conv_weights = self.conv1d.weight
@@ -199,10 +165,8 @@ class Qwen3_5GatedDeltaNet(BaseOP):
             b=b,
         ).to(dtype=z.dtype)
 
-        core = core.reshape(-1, core.shape[-1])
-        z = z.reshape(-1, z.shape[-1])
-        core = self.norm.forward(core)
-        core = core * F.silu(z)
+        core = core.reshape(-1, self.num_v_heads, self.head_v_dim)
+        gated_rmsnorm_(core, z, self.norm.weight, self.norm.eps)
         core = core.reshape(x.shape[0], -1)
         return self.out_proj.forward(core)
 

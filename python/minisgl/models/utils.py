@@ -1,6 +1,11 @@
 from __future__ import annotations
 
 import torch
+from minisgl.core import get_global_ctx
+from minisgl.kernel.triton.qwen35_fused import (
+    apply_attention_gate_,
+    prepare_qk_gate,
+)
 from minisgl.layers import (
     AttentionLayer,
     BaseOP,
@@ -17,6 +22,7 @@ from minisgl.layers import (
 )
 from minisgl.models import ModelConfig
 from minisgl.utils import nvtx_annotate
+
 
 class GatedMLP(BaseOP):
     def __init__(self, config: ModelConfig):
@@ -125,13 +131,22 @@ class RopeAttn(BaseOP):
             q_dim = self.attn.qo_attn_dim
             kv_dim = self.attn.kv_attn_dim
             qg, k, v = qkv.split([2 * q_dim, kv_dim, kv_dim], dim=-1)
-            orig_shape = qg.shape[:-1]
-            qg = qg.view(*orig_shape, self.attn.num_qo_heads, -1)
-            q, gate = torch.chunk(qg, 2, dim=-1)
-            q = q.reshape(*orig_shape, -1)
-            gate = gate.reshape(*orig_shape, -1)
-            o = self.attn.forward(torch.cat([q, k, v], dim=-1))
-            o = o * torch.sigmoid(gate)
+            q, k, gate = prepare_qk_gate(
+                qg,
+                k,
+                query_weight=self.q_norm.weight,
+                key_weight=self.k_norm.weight,
+                cos_sin_cache=self.attn.rotary._cos_sin_cache,
+                positions=get_global_ctx().batch.positions,
+                eps=self.q_norm.eps,
+                num_query_heads=self.attn.num_qo_heads,
+                num_key_heads=self.attn.num_kv_heads,
+                head_dim=self.attn.head_dim,
+                rotary_dim=self.attn.rotary._cos_sin_cache.shape[-1],
+            )
+            # Mini's compiled KV-store contract requires a dense token stride.
+            o = self.attn.forward_prepared(q, k, v.contiguous())
+            apply_attention_gate_(o, gate)
         else:
             o = self.attn.forward(qkv)
         return self.o_proj.forward(o)
