@@ -27,3 +27,8 @@ class UserReply(BaseFrontendMsg):
     uid: int
     incremental_output: str
     finished: bool
+    image_tokens: int = 0
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
+    finish_reason: str = ""
+    error: str | None = None

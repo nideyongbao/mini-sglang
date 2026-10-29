@@ -76,6 +76,10 @@ def tokenize_worker(
                             uid=msg.uid,
                             incremental_output=reply,
                             finished=msg.finished,
+                            image_tokens=msg.image_tokens,
+                            prompt_tokens=msg.prompt_tokens,
+                            completion_tokens=msg.completion_tokens,
+                            finish_reason=msg.finish_reason,
                         )
                         for msg, reply in zip(detokenize_msg, replies, strict=True)
                     ]
@@ -85,20 +89,23 @@ def tokenize_worker(
                 send_frontend.put(batch_output)
 
             if len(tokenize_msg) > 0:
-                tensors = tokenize_manager.tokenize(tokenize_msg)
-                batch_output = BatchBackendMsg(
-                    data=[
-                        UserMsg(
-                            uid=msg.uid,
-                            input_ids=t,
-                            sampling_params=msg.sampling_params,
+                for msg in tokenize_msg:
+                    try:
+                        tensor, images = tokenize_manager.prepare(msg)
+                        send_backend.put(
+                            UserMsg(
+                                uid=msg.uid,
+                                input_ids=tensor,
+                                sampling_params=msg.sampling_params,
+                                image_inputs=images,
+                            )
                         )
-                        for msg, t in zip(tokenize_msg, tensors, strict=True)
-                    ]
-                )
-                if len(batch_output.data) == 1:
-                    batch_output = batch_output.data[0]
-                send_backend.put(batch_output)
+                    except (ValueError, OSError, KeyError) as exc:
+                        send_frontend.put(
+                            UserReply(
+                                uid=msg.uid, incremental_output="", finished=True, error=str(exc)
+                            )
+                        )
             if len(abort_msg) > 0:
                 batch_output = BatchBackendMsg(
                     data=[AbortBackendMsg(uid=msg.uid) for msg in abort_msg]

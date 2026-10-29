@@ -132,9 +132,7 @@ class Qwen3_5GatedDeltaNet(BaseOP):
         mixed_qkvz: torch.Tensor,
         mixed_ba: torch.Tensor,
     ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
-        mixed_qkv, z = mixed_qkvz.split(
-            [self.local_conv_dim, self.local_v_dim], dim=-1
-        )
+        mixed_qkv, z = mixed_qkvz.split([self.local_conv_dim, self.local_v_dim], dim=-1)
         b, a = mixed_ba.split([self.num_v_heads, self.num_v_heads], dim=-1)
         z = z.view(z.shape[0], self.num_v_heads, self.head_v_dim)
         return mixed_qkv, z, b, a
@@ -253,8 +251,10 @@ class Qwen3_5Model(BaseOP):
             eps=config.rms_norm_eps,
         )
 
-    def forward(self, input_ids: torch.Tensor) -> torch.Tensor:
-        x = self.embed_tokens.forward(input_ids)
+    def forward(
+        self, input_ids: torch.Tensor, inputs_embeds: torch.Tensor | None = None
+    ) -> torch.Tensor:
+        x = self.embed_tokens.forward(input_ids) if inputs_embeds is None else inputs_embeds
         residual: torch.Tensor | None = None
         for layer in self.layers.op_list:
             x, residual = layer.forward(x, residual)
@@ -264,6 +264,10 @@ class Qwen3_5Model(BaseOP):
 class Qwen3_5ForCausalLM(BaseLLMModel):
     def __init__(self, config: "ModelConfig"):
         self.model = Qwen3_5Model(config)
+        if config.vision_config is not None:
+            from .vision import Qwen35Vision
+
+            self.visual = Qwen35Vision(config.vision_config)
         self.lm_head = ParallelLMHead(
             num_embeddings=config.vocab_size,
             embedding_dim=config.hidden_size,
@@ -273,7 +277,36 @@ class Qwen3_5ForCausalLM(BaseLLMModel):
         super().__init__()
 
     def forward(self) -> torch.Tensor:
-        output = self.model.forward(get_global_ctx().batch.input_ids)
+        batch = get_global_ctx().batch
+        embeddings = None
+        if batch.is_prefill and any(req.image_inputs is not None for req in batch.reqs):
+            embeddings = self.model.embed_tokens.forward(batch.input_ids)
+            offset = 0
+            with torch.profiler.record_function("minisgl.vlm.vision_encoder"):
+                for req in batch.reqs:
+                    mm = req.image_inputs
+                    if mm is not None:
+                        if not hasattr(self, "visual"):
+                            raise ValueError("This checkpoint has no vision encoder")
+                        if mm.embeddings is None:
+                            mm.embeddings = self.visual.forward(mm.pixel_values, mm.grid_thw)
+                            if mm.embeddings.shape[0] != len(mm.image_indices):
+                                raise ValueError(
+                                    "Vision output does not match image placeholder count"
+                                )
+                        mask = (mm.image_indices >= req.cached_len) & (
+                            mm.image_indices < req.device_len
+                        )
+                        indices = mm.image_indices[mask] - req.cached_len + offset
+                        selected = mask.nonzero().flatten().to(embeddings.device)
+                        embeddings[indices.to(embeddings.device)] = mm.embeddings[selected].to(
+                            embeddings.dtype
+                        )
+                    offset += req.extend_len
+        with torch.profiler.record_function(
+            "minisgl.vlm.language_model_prefill" if batch.is_prefill else "minisgl.decode"
+        ):
+            output = self.model.forward(batch.input_ids, embeddings)
         logits = self.lm_head.forward(output)
         return logits
 

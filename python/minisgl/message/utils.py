@@ -22,7 +22,9 @@ def serialize_type(self) -> Dict:
     serialized = {}
 
     if isinstance(self, torch.Tensor):
-        assert self.dim() == 1, "we can only serialize 1D tensor for now"
+        if self.device.type != "cpu":
+            raise ValueError("Only CPU tensors can cross the tokenizer boundary")
+        serialized["shape"] = list(self.shape)
         serialized["__type__"] = "Tensor"
         serialized["buffer"] = self.numpy().tobytes()
         serialized["dtype"] = str(self.dtype)
@@ -58,7 +60,7 @@ def deserialize_type(cls_map: Dict[str, Type], data: Dict) -> Any:
         np_dtype = getattr(np, dtype_str)
         assert isinstance(buffer, bytes)
         np_tensor = np.frombuffer(buffer, dtype=np_dtype)
-        return torch.from_numpy(np_tensor.copy())
+        return torch.from_numpy(np_tensor.copy()).reshape(data.get("shape", [-1]))
 
     cls = cls_map[type_name]
     kwargs = {}

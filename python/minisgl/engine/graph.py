@@ -25,6 +25,7 @@ class GraphCaptureBuffer:
     out_loc: torch.Tensor
     positions: torch.Tensor
     logits: torch.Tensor
+    rope_positions: torch.Tensor
 
     @classmethod
     def init(cls, bs: int, vocab_size: int, device: torch.device) -> GraphCaptureBuffer:
@@ -32,6 +33,7 @@ class GraphCaptureBuffer:
             input_ids=torch.zeros(bs, dtype=torch.int32, device=device),
             out_loc=torch.zeros(bs, dtype=torch.int32, device=device),
             positions=torch.zeros(bs, dtype=torch.int32, device=device),
+            rope_positions=torch.zeros(bs, dtype=torch.int64, device=device),
             logits=torch.empty(bs, vocab_size, dtype=torch.float32, device=device),
         )
 
@@ -40,12 +42,16 @@ class GraphCaptureBuffer:
         batch.input_ids = self.input_ids[_slice]
         batch.out_loc = self.out_loc[_slice]
         batch.positions = self.positions[_slice]
+        batch.rope_positions = self.rope_positions[_slice]
 
     def copy_from(self, batch: Batch) -> None:
         _slice = slice(batch.padded_size)
         self.input_ids[_slice] = batch.input_ids
         self.out_loc[_slice] = batch.out_loc
         self.positions[_slice] = batch.positions
+        self.rope_positions[_slice] = (
+            batch.rope_positions if batch.rope_positions is not None else batch.positions
+        )
 
 
 def _determine_cuda_graph_bs(

@@ -43,13 +43,17 @@ class ModelConfig:
     linear_num_key_heads: int
     linear_num_value_heads: int
 
+    vision_config: dict | None = None
+
     @property
     def is_moe(self) -> bool:
         return "moe" in self.model_type
 
     @property
     def has_linear_layers(self) -> bool:
-        return self.layer_types is not None and any(t == "linear_attention" for t in self.layer_types)
+        return self.layer_types is not None and any(
+            t == "linear_attention" for t in self.layer_types
+        )
 
     @classmethod
     def from_hf(cls, config: PretrainedConfig | dict) -> ModelConfig:
@@ -123,6 +127,9 @@ class ModelConfig:
         linear_num_value_heads = int(getattr(config, "linear_num_value_heads", 0))
 
         return cls(
+            vision_config=(lambda v: v.to_dict() if hasattr(v, "to_dict") else v)(
+                _get_attr(top, "vision_config")
+            ),
             num_layers=config.num_hidden_layers,
             num_qo_heads=config.num_attention_heads,
             num_kv_heads=num_kv_heads,

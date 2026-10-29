@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from typing import Callable, Dict, List, Literal, Tuple
 
 import uvicorn
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from minisgl.core import SamplingParams
 from minisgl.env import ENV
@@ -58,7 +58,7 @@ class GenerateRequest(BaseModel):
 
 class Message(BaseModel):
     role: Literal["system", "user", "assistant"]
-    content: str
+    content: str | List[dict]
 
 
 class OpenAICompletionRequest(BaseModel):
@@ -81,6 +81,9 @@ class OpenAICompletionRequest(BaseModel):
     frequency_penalty: float = 0.0
 
     ignore_eos: bool = False
+    chat_template_kwargs: dict | None = None
+    reasoning_effort: str | None = None
+    stream_options: dict | None = None
 
 
 class ModelCard(BaseModel):
@@ -157,9 +160,13 @@ class FrontendManager:
         yield "data: [DONE]\n".encode()
         logger.debug("Finished streaming response for user %s", uid)
 
-    async def stream_chat_completions(self, uid: int):
+    async def stream_chat_completions(self, uid: int, include_usage: bool = False):
         first_chunk = True
         async for ack in self.wait_for_ack(uid):
+            if ack.error:
+                yield f"data: {json.dumps({'error': {'message': ack.error, 'type': 'invalid_request_error'}})}\n\n".encode()
+                yield b"data: [DONE]\n\n"
+                return
             delta = {}
             if first_chunk:
                 delta["role"] = "assistant"
@@ -172,6 +179,14 @@ class FrontendManager:
                 "object": "text_completion.chunk",
                 "choices": [{"delta": delta, "index": 0, "finish_reason": None}],
             }
+            # Cumulative engine token counts also identify tokens with empty decoded text.
+            if include_usage:
+                chunk["usage"] = {
+                    "prompt_tokens": ack.prompt_tokens,
+                    "completion_tokens": ack.completion_tokens,
+                    "total_tokens": ack.prompt_tokens + ack.completion_tokens,
+                    "prompt_tokens_details": {"image_tokens": ack.image_tokens},
+                }
             yield f"data: {json.dumps(chunk)}\n\n".encode()
 
             if ack.finished:
@@ -181,7 +196,7 @@ class FrontendManager:
         end_chunk = {
             "id": f"cmpl-{uid}",
             "object": "text_completion.chunk",
-            "choices": [{"delta": {}, "index": 0, "finish_reason": "stop"}],
+            "choices": [{"delta": {}, "index": 0, "finish_reason": ack.finish_reason or "stop"}],
         }
         yield f"data: {json.dumps(end_chunk)}\n\n".encode()
         yield b"data: [DONE]\n\n"
@@ -255,6 +270,27 @@ async def v1_root():
 @app.post("/v1/chat/completions")
 async def v1_completions(req: OpenAICompletionRequest, request: Request):
     state = get_global_state()
+    if req.max_tokens < 1:
+        raise HTTPException(400, "max_tokens must be positive")
+    for msg in req.messages or []:
+        if isinstance(msg.content, list):
+            for part in msg.content:
+                if part.get("type") == "text" and isinstance(part.get("text"), str):
+                    continue
+                url = (
+                    part.get("image_url", {}).get("url", "")
+                    if isinstance(part.get("image_url"), dict)
+                    else ""
+                )
+                if (
+                    part.get("type") != "image_url"
+                    or not isinstance(url, str)
+                    or not url.startswith("data:image/")
+                    or ";base64," not in url
+                ):
+                    raise HTTPException(
+                        400, "Use text parts or image_url parts with base64 data:image URLs"
+                    )
     if req.messages:
         prompt = [msg.model_dump() for msg in req.messages]
     else:
@@ -273,19 +309,29 @@ async def v1_completions(req: OpenAICompletionRequest, request: Request):
                 temperature=req.temperature,
                 top_k=req.top_k,
                 top_p=req.top_p,
+                chat_template_kwargs=req.chat_template_kwargs,
+                reasoning_effort=req.reasoning_effort,
             ),
         )
     )
 
     if req.stream:
         return StreamingResponse(
-            state.stream_with_cancellation(state.stream_chat_completions(uid), request, uid),
+            state.stream_with_cancellation(
+                state.stream_chat_completions(
+                    uid, bool((req.stream_options or {}).get("include_usage"))
+                ),
+                request,
+                uid,
+            ),
             media_type="text/event-stream",
         )
 
     # Non-streaming: collect all chunks and return a single JSON response
     full_content = ""
     async for ack in state.wait_for_ack(uid):
+        if ack.error:
+            raise HTTPException(400, ack.error)
         full_content += ack.incremental_output
         if ack.finished:
             break
@@ -299,13 +345,14 @@ async def v1_completions(req: OpenAICompletionRequest, request: Request):
             {
                 "index": 0,
                 "message": {"role": "assistant", "content": full_content},
-                "finish_reason": "stop",
+                "finish_reason": ack.finish_reason or "stop",
             }
         ],
         "usage": {
-            "prompt_tokens": 0,
-            "completion_tokens": 0,
-            "total_tokens": 0,
+            "prompt_tokens": ack.prompt_tokens,
+            "completion_tokens": ack.completion_tokens,
+            "total_tokens": ack.prompt_tokens + ack.completion_tokens,
+            "prompt_tokens_details": {"image_tokens": ack.image_tokens},
         },
     }
 
@@ -333,6 +380,8 @@ async def shell_completion(req: OpenAICompletionRequest):
                 temperature=req.temperature,
                 top_k=req.top_k,
                 top_p=req.top_p,
+                chat_template_kwargs=req.chat_template_kwargs,
+                reasoning_effort=req.reasoning_effort,
             ),
         )
     )
@@ -345,7 +394,6 @@ async def shell_completion(req: OpenAICompletionRequest):
         media_type="text/event-stream",
         background=BackgroundTask(lambda: _abort),
     )
-
 
 
 async def shell():

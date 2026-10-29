@@ -57,3 +57,7 @@ To further reduce CPU overhead, Mini-SGLang employs overlap scheduling, a techni
 
 ![overlap](https://lmsys.org/images/blog/sglang_v0_4/scheduler.jpg)
 *Illustration of Overlap Scheduling from [LMSYS Blog](https://lmsys.org/blog/2024-12-04-sglang-v0-4/).*
+
+## Qwen3.5 images
+
+Dense Qwen3.5 checkpoints support image inputs through the offline API and native OpenAI-compatible server. See [Qwen3.5 image inference](qwen35-vlm.md) for setup, cache semantics, validation and profiling.

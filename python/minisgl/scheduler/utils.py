@@ -7,6 +7,7 @@ import torch
 
 if TYPE_CHECKING:
     from minisgl.core import SamplingParams
+    from minisgl.multimodal import ImageInputs
 
     from .prefill import ChunkedReq
 
@@ -17,6 +18,7 @@ class PendingReq:
     input_ids: torch.Tensor
     sampling_params: SamplingParams
     chunked_req: ChunkedReq | None = None
+    image_inputs: ImageInputs | None = None
 
     @property
     def input_len(self) -> int:

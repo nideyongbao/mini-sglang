@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from contextlib import contextmanager
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Dict, List, Literal
+from typing import TYPE_CHECKING, Dict, List, Literal
 
 import torch
 
@@ -10,6 +10,7 @@ if TYPE_CHECKING:
     from minisgl.attention import BaseAttnBackend, BaseAttnMetadata
     from minisgl.kvcache import BaseCacheHandle, BaseKVCachePool
     from minisgl.moe import BaseMoeBackend
+    from minisgl.multimodal import ImageInputs
 
 
 @dataclass
@@ -37,9 +38,11 @@ class Req:
     uid: int
     sampling_params: SamplingParams
     cache_handle: BaseCacheHandle
+    image_inputs: ImageInputs | None = None
 
     def __post_init__(self) -> None:
         assert self.input_ids.is_cpu
+        self.prompt_len = len(self.input_ids)
         self.device_len = len(self.input_ids)
         self.max_device_len = len(self.input_ids) + self.output_len
         assert 0 <= self.cached_len < self.device_len <= self.max_device_len
@@ -80,6 +83,8 @@ class Batch:
     positions: torch.Tensor = field(init=False)
     out_loc: torch.Tensor = field(init=False)
     padded_reqs: List[Req] = field(init=False)
+    rope_positions: torch.Tensor | None = None
+    mrope_cos_sin: torch.Tensor | None = None
     # this field should be set by attention backend
     attn_metadata: BaseAttnMetadata = field(init=False)
 

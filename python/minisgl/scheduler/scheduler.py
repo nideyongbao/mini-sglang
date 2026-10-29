@@ -186,10 +186,30 @@ class Scheduler(SchedulerIOMixin):
                 next_token = next_tokens_cpu[i]
                 req.append_host(next_token.unsqueeze(0))
                 next_token = int(next_token.item())
-                finished = not req.can_decode
+                # Overlap may have submitted the next step already. Completion
+                # must follow collected host tokens, not the advanced device cursor.
+                finished = len(req.input_ids) - req.prompt_len >= req.output_len
                 if not req.sampling_params.ignore_eos:
                     finished |= next_token == self.eos_token_id
-                reply.append(DetokenizeMsg(uid=req.uid, next_token=next_token, finished=finished))
+                reply.append(
+                    DetokenizeMsg(
+                        uid=req.uid,
+                        next_token=next_token,
+                        finished=finished,
+                        image_tokens=len(req.image_inputs.image_indices) if req.image_inputs else 0,
+                        prompt_tokens=req.prompt_len,
+                        completion_tokens=len(req.input_ids) - req.prompt_len,
+                        finish_reason=(
+                            (
+                                "length"
+                                if len(req.input_ids) - req.prompt_len >= req.output_len
+                                else "stop"
+                            )
+                            if finished
+                            else ""
+                        ),
+                    )
+                )
 
                 # NOTE: overlap scheduling may make the request freed twice, skip second free
                 if finished and req not in self.finished_reqs:
@@ -241,6 +261,7 @@ class Scheduler(SchedulerIOMixin):
         self.engine.graph_runner.pad_batch(batch)
         self.cache_manager.allocate_paged(batch.reqs)
         batch.positions = _make_positions(batch, self.device)
+        batch.rope_positions = _make_rope_positions(batch, self.device)
         input_mapping = _make_input_tuple(batch, self.device)
         write_mapping = _make_write_tuple(batch, self.device)
         batch.out_loc = self.engine.page_table[input_mapping]
@@ -306,3 +327,24 @@ def _make_write_tuple(batch: Batch, device: torch.device) -> Indice2D:
 def _resolve_optional_callback(obj: object, name: str):
     cb = getattr(obj, name, None)
     return cb if callable(cb) else None
+
+
+def _make_rope_positions(batch: Batch, device: torch.device) -> torch.Tensor:
+    if not any(req.image_inputs is not None for req in batch.reqs):
+        return batch.positions
+    if batch.is_decode:
+        # KV addresses stay absolute; generated-token RoPE continues after the compact image grid.
+        values = [
+            req.cached_len + (req.image_inputs.rope_delta if req.image_inputs else 0)
+            for req in batch.padded_reqs
+        ]
+        return torch.tensor(values, dtype=torch.int64, pin_memory=True).to(
+            device, non_blocking=True
+        )
+    pieces = []
+    for req in batch.padded_reqs:
+        if req.image_inputs is not None:
+            pieces.append(req.image_inputs.positions[:, req.cached_len : req.device_len])
+        else:
+            pieces.append(torch.arange(req.cached_len, req.device_len).expand(3, -1))
+    return torch.cat(pieces, dim=1).pin_memory().to(device, non_blocking=True)

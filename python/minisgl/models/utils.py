@@ -99,6 +99,9 @@ class RopeAttn(BaseOP):
             has_bias=has_attn_bias,
             q_multiplier=q_multiplier,
         )
+        self._mrope_section = (config.rotary_config.scaling or {}).get(
+            "mrope_section", [11, 11, 10]
+        )
         self.has_qk_norm = has_qk_norm
         self.has_attn_output_gate = has_attn_output_gate
         if has_qk_norm:
@@ -131,13 +134,25 @@ class RopeAttn(BaseOP):
             q_dim = self.attn.qo_attn_dim
             kv_dim = self.attn.kv_attn_dim
             qg, k, v = qkv.split([2 * q_dim, kv_dim, kv_dim], dim=-1)
+            batch = get_global_ctx().batch
+            positions = (
+                batch.rope_positions if batch.rope_positions is not None else batch.positions
+            )
+            cache = self.attn.rotary._cos_sin_cache
+            if positions.ndim == 2:
+                from minisgl.kernel.triton.qwen35_fused import build_mrope_cache
+
+                if batch.mrope_cos_sin is None:
+                    batch.mrope_cos_sin = build_mrope_cache(cache, positions, self._mrope_section)
+                cache = batch.mrope_cos_sin
+                positions = torch.arange(positions.shape[1], device=positions.device)
             q, k, gate = prepare_qk_gate(
                 qg,
                 k,
                 query_weight=self.q_norm.weight,
                 key_weight=self.k_norm.weight,
-                cos_sin_cache=self.attn.rotary._cos_sin_cache,
-                positions=get_global_ctx().batch.positions,
+                cos_sin_cache=cache,
+                positions=positions,
                 eps=self.q_norm.eps,
                 num_query_heads=self.attn.num_qo_heads,
                 num_key_heads=self.attn.num_kv_heads,

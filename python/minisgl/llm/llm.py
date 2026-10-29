@@ -35,7 +35,9 @@ class LLM(Scheduler):
             **kwargs,
         )
         super().__init__(config)
-        self.pending_requests: List[Tuple[List[int] | str, SamplingParams]] = []
+        self._model_path = model_path
+        self._image_processor = None
+        self.pending_requests: List[Tuple[List[int] | str | dict, SamplingParams]] = []
         self.status_map: Dict[int, RequestStatus] = {}
         self.counter = 0
 
@@ -53,14 +55,36 @@ class LLM(Scheduler):
         for tokens_or_prompt, sampling_params in self.pending_requests:
             if sum_input_len >= self.prefill_budget:
                 break
-            input_ids = self._tokenize_one(tokens_or_prompt)
+            image_inputs = None
+            if isinstance(tokens_or_prompt, dict):
+                from minisgl.multimodal import ImageProcessor
+
+                if self._image_processor is None:
+                    self._image_processor = ImageProcessor(self._model_path)
+                template_kwargs = dict(sampling_params.chat_template_kwargs or {})
+                if sampling_params.reasoning_effort:
+                    template_kwargs["reasoning_effort"] = sampling_params.reasoning_effort
+                input_ids, image_inputs = self._image_processor.prepare(
+                    tokens_or_prompt["messages"], **template_kwargs
+                )
+            else:
+                input_ids = self._tokenize_one(tokens_or_prompt)
             sum_input_len += len(input_ids)
             uid, added = self.counter + added, added + 1
-            results.append(UserMsg(uid=uid, input_ids=input_ids, sampling_params=sampling_params))
+            results.append(
+                UserMsg(
+                    uid=uid,
+                    input_ids=input_ids,
+                    sampling_params=sampling_params,
+                    image_inputs=image_inputs,
+                )
+            )
             self.status_map[uid] = RequestStatus(
                 uid=uid,
                 input_ids=(
-                    input_ids.tolist() if isinstance(tokens_or_prompt, str) else tokens_or_prompt
+                    input_ids.tolist()
+                    if isinstance(tokens_or_prompt, (str, dict))
+                    else tokens_or_prompt
                 ),
                 output_ids=[],
             )
@@ -76,7 +100,7 @@ class LLM(Scheduler):
 
     def generate(
         self,
-        prompts: List[str] | List[List[int]],
+        prompts: List[str] | List[List[int]] | List[dict],
         sampling_params: List[SamplingParams] | SamplingParams,
     ) -> List[Dict[str, str | List[int]]]:
         self.pending_requests = []

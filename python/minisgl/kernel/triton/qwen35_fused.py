@@ -10,6 +10,48 @@ import triton.language as tl
 
 
 @triton.jit
+def _mrope_cache_kernel(
+    cache,
+    positions,
+    output,
+    length: tl.constexpr,
+    dim: tl.constexpr,
+    h_section: tl.constexpr,
+    w_section: tl.constexpr,
+    block: tl.constexpr,
+):
+    token = tl.program_id(0)
+    col = tl.arange(0, block)
+    frequency = col % (dim // 2)
+    axis = tl.where(
+        (frequency % 3 == 1) & (frequency < h_section * 3),
+        1,
+        tl.where((frequency % 3 == 2) & (frequency < w_section * 3), 2, 0),
+    )
+    pos = tl.load(positions + axis * length + token)
+    values = tl.load(cache + pos * dim + col, col < dim, 0)
+    tl.store(output + token * dim + col, values, col < dim)
+
+
+def build_mrope_cache(cache: torch.Tensor, positions: torch.Tensor, sections):
+    """Select THW frequencies once per batch; reuse fused QK norm/RoPE at every layer."""
+    length, dim = positions.shape[1], cache.shape[1]
+    output = torch.empty((length, dim), device=cache.device, dtype=cache.dtype)
+    _mrope_cache_kernel[(length,)](
+        cache,
+        positions.contiguous(),
+        output,
+        length,
+        dim,
+        sections[1],
+        sections[2],
+        triton.next_power_of_2(dim),
+        num_warps=1,
+    )
+    return output
+
+
+@triton.jit
 def _gated_rmsnorm_kernel(
     core,
     gate,

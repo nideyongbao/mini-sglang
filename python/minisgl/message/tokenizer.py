@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from minisgl.core import SamplingParams
 
@@ -30,6 +30,7 @@ class DetokenizeMsg(BaseTokenizerMsg):
     next_token: int
     finished: bool
     finish_reason: str = ""
+    image_tokens: int = 0
     prompt_tokens: int = 0
     completion_tokens: int = 0
 
@@ -37,7 +38,7 @@ class DetokenizeMsg(BaseTokenizerMsg):
 @dataclass
 class TokenizeMsg(BaseTokenizerMsg):
     uid: int
-    text: str | List[Dict[str, str]]
+    text: str | List[Dict[str, Any]]
     sampling_params: SamplingParams
 
 

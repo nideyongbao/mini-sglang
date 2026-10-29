@@ -40,7 +40,7 @@ class CacheManager:
         self.page_size = page_size
 
     def match_req(self, req: PendingReq) -> MatchResult:
-        if self.disable_prefix_cache:
+        if self.disable_prefix_cache or req.image_inputs is not None:
             return self.prefix_cache.match_prefix(self._empty_prefix_ids)
         input_len = req.input_len
         assert input_len > 0, "Input length must be greater than 0."
@@ -89,7 +89,8 @@ class CacheManager:
             _write_page_table(self.page_table, allocated, allocation_info, self.page_size)
 
     def cache_req(self, req: Req, *, finished: bool) -> None:
-        if self.disable_prefix_cache:
+        # Image content is not represented in the token-only prefix key.
+        if self.disable_prefix_cache or req.image_inputs is not None:
             if finished:
                 page_indices = self.page_table[req.table_idx, : req.cached_len]
                 self._free(page_indices)

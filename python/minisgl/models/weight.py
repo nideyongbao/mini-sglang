@@ -166,7 +166,11 @@ def load_weight(model_path: str, device: torch.device) -> Iterator[Tuple[str, to
     for file in tqdm(files, desc="Loading weights", disable=not tp_info.is_primary()):
         with safetensors.safe_open(file, framework="pt", device=str(device)) as f:
             for name in f.keys():
-                # Strip multimodal wrapper prefix, skip vision/projector weights
+                # Vision is replicated across TP ranks; do not apply text projection merges.
+                if name.startswith("model.visual.") and config.vision_config is not None:
+                    yield "visual." + name.removeprefix("model.visual."), f.get_tensor(name)
+                    continue
+                # Strip multimodal wrapper prefix, skip unsupported auxiliary weights
                 if name.startswith(
                     (
                         "vision_tower.",
