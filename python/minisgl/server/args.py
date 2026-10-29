@@ -203,6 +203,13 @@ def parse_args(args: List[str], run_shell: bool = False) -> Tuple[ServerArgs, bo
     )
 
     parser.add_argument(
+        "--image-cache-size-mb",
+        type=int,
+        default=ServerArgs.image_cache_size_mb,
+        help="Image embedding LRU capacity in MiB per model/rank; 0 disables it (default: 100).",
+    )
+
+    parser.add_argument(
         "--cache-type",
         type=str,
         default=ServerArgs.cache_type,

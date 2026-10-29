@@ -29,6 +29,11 @@ class EngineConfig:
     use_pynccl: bool = True
     max_seq_len_override: int | None = None
     num_page_override: int | None = None  # if not None, will override the number of pages
+    image_cache_size_mb: int = 100  # MiB per model/rank; 0 disables cross-request image reuse
+
+    def __post_init__(self):
+        if self.image_cache_size_mb < 0:
+            raise ValueError("image_cache_size_mb must be non-negative")
 
     @cached_property
     def hf_config(self):

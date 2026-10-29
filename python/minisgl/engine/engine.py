@@ -52,6 +52,10 @@ class Engine:
         with torch.device("meta"), torch_dtype(config.dtype):
             self.model = create_model(config.model_config)
         self.model.load_state_dict(self._load_weight_state_dict(config))
+        self.image_cache_capacity = 0
+        if hasattr(self.model, "visual"):
+            self.image_cache_capacity = config.image_cache_size_mb * 1024**2
+            self.model.visual.configure_cache(self.image_cache_capacity)
         self.attention_layers = _collect_attention_layers(self.model)
 
         # ======================= KV cache initialization ========================
@@ -162,7 +166,11 @@ class Engine:
         num_pages = config.num_page_override
         if num_pages is None:
             model_memory = old_free_memory - new_free_memory
-            available_memory = int(config.memory_ratio * old_free_memory) - model_memory
+            available_memory = (
+                int(config.memory_ratio * old_free_memory)
+                - model_memory
+                - self.image_cache_capacity
+            )
             num_pages = available_memory // cache_per_page
 
         assert num_pages > 1, "Not enough memory for KV cache, try reducing --num-pages"
@@ -217,6 +225,8 @@ class Engine:
         return ForwardOutput(next_tokens_gpu, next_tokens_cpu, copy_done_event)
 
     def shutdown(self) -> None:
+        if hasattr(self.model, "visual"):
+            self.model.visual._cache.clear()
         self.graph_runner.destroy_cuda_graphs()
         torch.distributed.destroy_process_group()
         destroy_distributed()
@@ -242,6 +252,7 @@ def _adjust_config(config: EngineConfig):
     if config.model_config.is_moe and config.moe_backend == "auto":
         override("moe_backend", "fused")
         logger.info_rank0(f"Auto-selected MoE backend: {config.moe_backend}")
+
 
 def _collect_attention_layers(model: Any) -> list[Any]:
     layers: list[Any] = []

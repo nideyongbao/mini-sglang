@@ -289,7 +289,7 @@ class Qwen3_5ForCausalLM(BaseLLMModel):
                         if not hasattr(self, "visual"):
                             raise ValueError("This checkpoint has no vision encoder")
                         if mm.embeddings is None:
-                            mm.embeddings = self.visual.forward(mm.pixel_values, mm.grid_thw)
+                            mm.embeddings = self.visual.encode_images(mm)
                             if mm.embeddings.shape[0] != len(mm.image_indices):
                                 raise ValueError(
                                     "Vision output does not match image placeholder count"

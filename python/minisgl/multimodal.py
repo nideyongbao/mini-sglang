@@ -1,13 +1,14 @@
 """Image input preparation for Qwen3.5. All preprocessing runs on the CPU.
 
-Image embeddings are reused only within a request (for chunked prefill), never
-across requests. KV token offsets and MRoPE coordinates are deliberately separate.
+Image embeddings may be reused across requests by a bounded model-local cache.
+KV token offsets and MRoPE coordinates are deliberately separate.
 """
 
 from __future__ import annotations
 
 import base64
 import io
+import hashlib
 from dataclasses import dataclass
 from typing import Any
 
@@ -23,6 +24,36 @@ class ImageInputs:
     image_indices: torch.Tensor
     rope_delta: int
     embeddings: torch.Tensor | None = None
+    image_hashes: list[str] | None = None
+
+
+def image_hashes(pixel_values: torch.Tensor, grid_thw: torch.Tensor) -> list[str]:
+    """Hash actual processor output, not a URL, text, or image placeholder IDs.
+
+    Model identity and weight/embedding dtype are implicit in the owning model
+    instance. Grid, pixel shape, dtype and normalized bytes distinguish processor
+    outputs. No caller-provided HTTP cache keys are accepted.
+    """
+    if pixel_values.device.type != "cpu" or grid_thw.device.type != "cpu":
+        raise ValueError("Image cache keys must be computed before GPU transfer")
+    keys = []
+    offset = 0
+    for grid in grid_thw.tolist():
+        size = grid[0] * grid[1] * grid[2]
+        pixels = pixel_values[offset : offset + size].contiguous()
+        if pixels.shape[0] != size:
+            raise ValueError("Image pixels do not match grid")
+        digest = hashlib.sha256()
+        digest.update(
+            repr(("qwen35-image-v1", grid, tuple(pixels.shape), str(pixels.dtype))).encode()
+        )
+        # uint8 supports BF16 too; memoryview avoids another full image copy.
+        digest.update(memoryview(pixels.view(torch.uint8).numpy()))
+        keys.append(digest.hexdigest())
+        offset += size
+    if offset != len(pixel_values):
+        raise ValueError("Unassigned image pixels")
+    return keys
 
 
 def image_positions(
@@ -57,10 +88,11 @@ def image_positions(
 
 
 class ImageProcessor:
-    def __init__(self, model_path: str):
+    def __init__(self, model_path: str, cache_enabled: bool = True):
         from transformers import AutoConfig, AutoProcessor
 
         self.processor = AutoProcessor.from_pretrained(model_path)
+        self.cache_enabled = cache_enabled
         self.config = AutoConfig.from_pretrained(model_path)
         if self.config.model_type != "qwen3_5":
             raise ValueError("Image inference currently supports dense Qwen3.5 checkpoints")
@@ -101,6 +133,8 @@ class ImageProcessor:
                 (ids == self.config.image_token_id).nonzero().flatten(),
                 delta,
             )
+            if self.cache_enabled:
+                mm.image_hashes = image_hashes(mm.pixel_values, grid)
         return ids, mm
 
 

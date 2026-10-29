@@ -35,6 +35,7 @@ class LLM(Scheduler):
             **kwargs,
         )
         super().__init__(config)
+        self._image_cache_enabled = config.image_cache_size_mb > 0
         self._model_path = model_path
         self._image_processor = None
         self.pending_requests: List[Tuple[List[int] | str | dict, SamplingParams]] = []
@@ -60,7 +61,9 @@ class LLM(Scheduler):
                 from minisgl.multimodal import ImageProcessor
 
                 if self._image_processor is None:
-                    self._image_processor = ImageProcessor(self._model_path)
+                    self._image_processor = ImageProcessor(
+                        self._model_path, cache_enabled=self._image_cache_enabled
+                    )
                 template_kwargs = dict(sampling_params.chat_template_kwargs or {})
                 if sampling_params.reasoning_effort:
                     template_kwargs["reasoning_effort"] = sampling_params.reasoning_effort
@@ -120,3 +123,13 @@ class LLM(Scheduler):
             output_text = self.tokenizer.decode(status.output_ids)
             results.append({"text": output_text, "token_ids": status.output_ids})
         return results
+
+    def clear_image_cache(self) -> None:
+        """Clear cross-request image embeddings and counters between generate calls."""
+        visual = getattr(self.engine.model, "visual", None)
+        if visual is not None:
+            visual._cache.clear()
+
+    def image_cache_stats(self) -> dict[str, int]:
+        visual = getattr(self.engine.model, "visual", None)
+        return visual._cache.stats() if visual is not None else {}

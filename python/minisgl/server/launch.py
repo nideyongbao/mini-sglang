@@ -74,6 +74,7 @@ def launch_server(run_shell: bool = False) -> None:
             target=tokenize_worker,
             kwargs={
                 "tokenizer_path": server_args.model_path,
+                "image_cache_enabled": server_args.image_cache_size_mb > 0,
                 "addr": server_args.zmq_detokenizer_addr,
                 "backend_addr": server_args.zmq_backend_addr,
                 "frontend_addr": server_args.zmq_frontend_addr,
@@ -90,6 +91,7 @@ def launch_server(run_shell: bool = False) -> None:
                 target=tokenize_worker,
                 kwargs={
                     "tokenizer_path": server_args.model_path,
+                    "image_cache_enabled": server_args.image_cache_size_mb > 0,
                     "addr": server_args.zmq_tokenizer_addr,
                     "backend_addr": server_args.zmq_backend_addr,
                     "frontend_addr": server_args.zmq_frontend_addr,

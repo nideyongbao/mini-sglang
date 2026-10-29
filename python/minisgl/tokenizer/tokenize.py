@@ -8,8 +8,11 @@ from transformers import PreTrainedTokenizerBase
 
 
 class TokenizeManager:
-    def __init__(self, tokenizer: PreTrainedTokenizerBase) -> None:
+    def __init__(
+        self, tokenizer: PreTrainedTokenizerBase, image_cache_enabled: bool = True
+    ) -> None:
         self.tokenizer = tokenizer
+        self.image_cache_enabled = image_cache_enabled
         self.image_processor = None
 
     def tokenize(self, msgs: List[TokenizeMsg]) -> List[torch.Tensor]:
@@ -39,7 +42,9 @@ class TokenizeManager:
             kwargs["reasoning_effort"] = msg.sampling_params.reasoning_effort
         if has_images(msg.text):
             if self.image_processor is None:
-                self.image_processor = ImageProcessor(self.tokenizer.name_or_path)
+                self.image_processor = ImageProcessor(
+                    self.tokenizer.name_or_path, cache_enabled=self.image_cache_enabled
+                )
             return self.image_processor.prepare(msg.text, **kwargs)
         prompt = (
             self.tokenizer.apply_chat_template(

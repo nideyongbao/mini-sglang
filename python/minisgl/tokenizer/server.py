@@ -37,6 +37,7 @@ def tokenize_worker(
     frontend_addr: str,
     local_bs: int,
     tokenizer_id: int = -1,
+    image_cache_enabled: bool = True,
     model_source: str = "huggingface",
     ack_queue: mp.Queue[str] | None = None,
 ) -> None:
@@ -50,7 +51,7 @@ def tokenize_worker(
     from .detokenize import DetokenizeManager
     from .tokenize import TokenizeManager
 
-    tokenize_manager = TokenizeManager(tokenizer)
+    tokenize_manager = TokenizeManager(tokenizer, image_cache_enabled=image_cache_enabled)
     detokenize_manager = DetokenizeManager(tokenizer)
 
     if ack_queue is not None:
