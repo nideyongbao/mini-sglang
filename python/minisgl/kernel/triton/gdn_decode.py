@@ -28,6 +28,7 @@ def _packed_decode_kernel(
     BK: tl.constexpr,
     BV: tl.constexpr,
     SOFTPLUS_THRESHOLD: tl.constexpr,
+    ROUND_BETA: tl.constexpr,
 ):
     i_v, i_nh = tl.program_id(0), tl.program_id(1)
     i_n, i_hv = i_nh // HV, i_nh % HV
@@ -73,6 +74,8 @@ def _packed_decode_kernel(
     softplus_x = tl.where(x <= SOFTPLUS_THRESHOLD, tl.log(1.0 + tl.exp(x)), x)
     g = -tl.exp(A_val) * softplus_x
     beta = tl.sigmoid(b_val)
+    if ROUND_BETA:
+        beta = beta.to(b.dtype.element_ty).to(tl.float32)
 
     h = h * tl.exp(g)
     v = v - tl.sum(h * k[None, :], axis=1)
@@ -97,6 +100,7 @@ def packed_decode(
     head_k_dim: int,
     head_v_dim: int,
     scale: float,
+    round_beta: bool = False,
 ) -> torch.Tensor:
     if mixed_qkv.ndim != 2 or a.ndim != 2 or b.ndim != 2:
         raise ValueError("packed_decode expects [B, D] mixed_qkv and [B, HV] a/b.")
@@ -139,6 +143,7 @@ def packed_decode(
         BK=BK,
         BV=BV,
         SOFTPLUS_THRESHOLD=20.0,
+        ROUND_BETA=round_beta,
         num_warps=1,
         num_stages=3,
     )

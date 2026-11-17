@@ -1,0 +1,12 @@
+{
+  "healthy": true,
+  "changed_config_fields": [
+    "Env"
+  ],
+  "ports_match": true,
+  "model_ids": [
+    "qwen"
+  ],
+  "environment_equal_as_mapping": true,
+  "changed_environment_keys": []
+}

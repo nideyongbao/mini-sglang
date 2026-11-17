@@ -1,5 +1,7 @@
 # Qwen3.8 Flash Next：适配、精度与性能报告
 
+> 后续逐层捕获与算子消融见 [逐层对齐报告](qwen38-layerwise-alignment-report.md)。该轮确认了 shared merge、GDN beta 舍入、HC gate 投影、QSA prefill/indexer RoPE，以及参考 fast-topk 并列选择的非确定性，并修复短 batch decode 的 scratch NaN。下文性能和精度数字保留为修正前的历史基线。
+
 测试日期：2026-11-17；分支：`feat/qwen38-next-local`；基线提交：`b32c62a62b895d38785d7ac23089cc413e3684de`。
 
 ## 结论

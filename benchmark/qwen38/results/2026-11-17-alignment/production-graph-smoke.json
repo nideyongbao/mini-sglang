@@ -1,0 +1,58 @@
+{
+  "backend": "mini",
+  "ablation": "production",
+  "finite_preflight": true,
+  "context": 4096,
+  "repeats": 1,
+  "rows": [
+    {
+      "batch": 2,
+      "input_tokens": 16,
+      "output_tokens": 1,
+      "median_ms": 14.627396129071712,
+      "min_ms": 14.627396129071712,
+      "max_ms": 14.627396129071712,
+      "output_tokens_per_s": 136.72973524146465,
+      "seconds": [
+        0.014627396129071712
+      ]
+    },
+    {
+      "batch": 2,
+      "input_tokens": 16,
+      "output_tokens": 128,
+      "median_ms": 125.01170486211777,
+      "min_ms": 125.01170486211777,
+      "max_ms": 125.01170486211777,
+      "output_tokens_per_s": 2047.8082454947428,
+      "seconds": [
+        0.12501170486211777
+      ]
+    },
+    {
+      "batch": 2,
+      "input_tokens": 2048,
+      "output_tokens": 1,
+      "median_ms": 106.76401853561401,
+      "min_ms": 106.76401853561401,
+      "max_ms": 106.76401853561401,
+      "output_tokens_per_s": 18.732902970796722,
+      "seconds": [
+        0.10676401853561401
+      ]
+    },
+    {
+      "batch": 2,
+      "input_tokens": 2048,
+      "output_tokens": 128,
+      "median_ms": 230.81854544579983,
+      "min_ms": 230.81854544579983,
+      "max_ms": 230.81854544579983,
+      "output_tokens_per_s": 1109.09632285207,
+      "seconds": [
+        0.23081854544579983
+      ]
+    }
+  ],
+  "measurement_use": "functional_finiteness_only_original_service_running_not_for_performance_comparison"
+}

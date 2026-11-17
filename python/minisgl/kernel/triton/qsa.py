@@ -108,8 +108,11 @@ def _gather(
     )
 
 
-def sparse_decode(q, k, v, indices):
-    """Pack rows (valid indices before -1 padding) and use the reference FA3 kernel."""
+def sparse_decode(q, k, v, indices, *, zero_scratch=True):
+    """Pack rows (valid indices before -1 padding) and use the reference FA3 kernel.
+
+    Disabling scratch initialization is reserved for reproducing historical failures.
+    """
     from sgl_kernel.flash_attn import flash_attn_varlen_func
 
     batch, top = indices.shape
@@ -117,6 +120,10 @@ def sparse_decode(q, k, v, indices):
     cu = torch.cat((lengths.new_zeros(1), lengths.cumsum(0, dtype=torch.int32)))
     packed_k = k.new_empty(batch * top, k.shape[1], k.shape[2])
     packed_v = torch.empty_like(packed_k)
+    # FA3 may read masked tile lanes; never expose allocator garbage/NaNs.
+    if zero_scratch:
+        packed_k.zero_()
+        packed_v.zero_()
     _gather[(batch, triton.cdiv(top, 32))](
         k,
         v,

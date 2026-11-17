@@ -1,0 +1,21 @@
+sglang-qwen38-dflash2
+name, uuid, memory.used [MiB], utilization.gpu [%], temperature.gpu, power.draw [W]
+NVIDIA H20, GPU-669cd1a2-d2c7-add4-82dc-22d9263e8165, 0 MiB, 0 %, 37, 138.04 W
+MEASURE mini zero 2026-11-17T13:30:31+08:00
+MEASURE mini shared+zero 2026-11-17T13:30:49+08:00
+MEASURE mini rounded+zero 2026-11-17T13:31:07+08:00
+MEASURE mini hc+zero 2026-11-17T13:31:25+08:00
+MEASURE mini qsa+zero 2026-11-17T13:31:47+08:00
+MEASURE mini shared+rounded+rope+zero+direct 2026-11-17T13:32:05+08:00
+MEASURE mini shared+gdn+hc+qsa+zero 2026-11-17T13:32:23+08:00
+MEASURE mini shared+gdn+hc+qsa+reduce+index+rope+zero+direct+width 2026-11-17T13:32:45+08:00
+MEASURE sglang 2026-11-17T13:33:09+08:00
+name, memory.used [MiB], utilization.gpu [%], temperature.gpu, power.draw [W]
+NVIDIA H20, 0 MiB, 0 %, 36, 130.99 W
+Starting container: docker run --detach --rm --pull never --name sglang-qwen38-dflash2 --gpus all --ipc host --shm-size 32g --publish 0.0.0.0:8000:8000 --volume /shard_data/brooksli/models/Qwen/Qwen3.8-27B-FP8:/shard_data/brooksli/models/Qwen/Qwen3.8-27B-FP8:ro --volume /shard_data/brooksli/models/z-lab/Qwen3.8-27B-DFlash2:/shard_data/brooksli/models/z-lab/Qwen3.8-27B-DFlash2:ro --volume /shard_data/brooksli/workspace/logs:/var/log/sglang:rw --env CUDA_VISIBLE_DEVICES=0 --env SGLANG_LOG_FILE=/var/log/sglang/sglang-qwen38-dflash2-3.log --env HF_HUB_OFFLINE=1 --env TRANSFORMERS_OFFLINE=1 --env SGLANG_SKIP_SGL_KERNEL_VERSION_CHECK=1 --env SGLANG_JIT_DEEPGEMM_PRECOMPILE=0 --env DFLASH_ENABLE_FA3_COMPAT=1 --env NO_PROXY=127.0.0.1\,localhost\,::1 --env no_proxy=127.0.0.1\,localhost\,::1 --env TZ=Asia/Shanghai --entrypoint bash lmsysorg/sglang:dev-cu12-qwen38-27b-dflash2 -c $'printf "\\n===== SGLang start: %s =====\\n" "$(date +%Y-%m-%dT%H:%M:%S%z)" >> "$SGLANG_LOG_FILE"\nexec python -m sglang.launch_server "$@" >> "$SGLANG_LOG_FILE" 2>&1' sglang --model-path /shard_data/brooksli/models/Qwen/Qwen3.8-27B-FP8 --trust-remote-code --random-seed 420817 --tp-size 1 --dtype auto --context-length 262144 --mem-fraction-static 0.80 --kv-cache-dtype fp8_e4m3 --mamba-ssm-dtype bfloat16 --max-running-requests 32 --max-mamba-cache-size 32 --chunked-prefill-size 4096 --max-prefill-tokens 16384 --schedule-policy fcfs --attention-backend fa3 --cuda-graph-max-bs-decode 32 --cuda-graph-bs-decode 32 --watchdog-timeout 1800 --mamba-radix-cache-strategy extra_buffer --fp8-gemm-backend flashinfer_deepgemm --speculative-algorithm DFLASH --speculative-draft-model-path /shard_data/brooksli/models/z-lab/Qwen3.8-27B-DFlash2 --speculative-num-draft-tokens 8 --speculative-dflash-block-size 8 --speculative-draft-model-quantization unquant --speculative-draft-attention-backend fa3 --speculative-draft-kv-cache-dtype fp8_e4m3 --host 0.0.0.0 --port 8000 --served-model-name qwen --reasoning-parser qwen3 --tool-call-parser qwen3_coder --enable-metrics
+SGLang DFlash2 container started: sglang-qwen38-dflash2 (88bfee3aa506e696ae92db2840e53632a1031c64be9c513ce9703f27cac7d6d7)
+Endpoint: http://0.0.0.0:8000/v1
+Log file: /shard_data/brooksli/workspace/logs/sglang-qwen38-dflash2-3.log
+Logs:     tail -f /shard_data/brooksli/workspace/logs/sglang-qwen38-dflash2-3.log
+Stop:     docker stop sglang-qwen38-dflash2 sglang-prometheus sglang-grafana
+ORIGINAL_SERVICE_RESTORED_HEALTHY 2026-11-17T13:36:46+0800

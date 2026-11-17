@@ -1,0 +1,73 @@
+{
+  "date": "2026-11-17",
+  "branch": "feat/qwen38-next-local",
+  "base_commit": "3ea182d4a334cc9020a86e772730293fd40c1e11",
+  "image": "lmsysorg/sglang:dev-cu12-qwen38-next-local",
+  "image_id": "sha256:51eb4a3747ac86e2c46ad925302fc38aa3fe0095728e9dd90654f0d266205145",
+  "reference_commit": "4ccff141dbe992794f9da6c3aa23535b4f72000d",
+  "gpu": "NVIDIA H20",
+  "tensor_capture": {
+    "mode": "eager",
+    "context": 4096,
+    "chunk": 512,
+    "steps": 8,
+    "batches": [
+      1,
+      2
+    ],
+    "forced_continuation": true
+  },
+  "exclusive_performance": {
+    "lengths": [
+      128,
+      2048
+    ],
+    "batches": [
+      1,
+      4
+    ],
+    "outputs": [
+      1,
+      128
+    ],
+    "graph_batches": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "warmups": 2,
+    "repeats": 5,
+    "finite_preflight": true,
+    "ordinary_topk": true
+  },
+  "strict_diagnostic": {
+    "stable_qsa_topk_on_both_backends": true,
+    "reference_operator_substitution": true,
+    "includes_reference_moe_router": true,
+    "exact_logit_frames": 68,
+    "logit_rows": 84,
+    "not_production_default": true,
+    "no_exclusive_timing_for_stable_topk": true
+  },
+  "production_fixes": [
+    "python/minisgl/models/qwen3_8.py",
+    "python/minisgl/models/qwen3_8_qsa.py",
+    "python/minisgl/kernel/triton/gdn_decode.py",
+    "python/minisgl/kernel/triton/qsa.py",
+    "python/minisgl/attention/gdn.py",
+    "python/minisgl/models/qwen3_5.py"
+  ],
+  "source_sha256": {
+    "python/minisgl/models/qwen3_8.py": "d4ba94f8edbdcfc012bd1da3d8722fbd57738d674ecb77848ec23bc96cb348e5",
+    "python/minisgl/models/qwen3_8_qsa.py": "1112f37cdeed4fe074a672f7dc3626dfc7b5172c39378151c656c4e59ec7b03c",
+    "python/minisgl/kernel/triton/gdn_decode.py": "49197395bf68b1529d5bd8e7f805a9630aa33bd6736b6e37dbd66f8e687bebb7",
+    "python/minisgl/kernel/triton/qsa.py": "2139c386a0229a4084c61a412bb15a50bb61e4ad326a9102d9d8d65ed4741556",
+    "python/minisgl/attention/gdn.py": "ca18fd9bf616573b1757a082eca795f3e96a8e03afc8151af71e1ecdcd3dcd37",
+    "python/minisgl/models/qwen3_5.py": "510420dc3e8785978acee397a7d4bb398a39de7dbaee61dce90ea6cec22f80e2"
+  }
+}

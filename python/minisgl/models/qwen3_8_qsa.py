@@ -25,13 +25,32 @@ class QSAIndexer(BaseOP):
         self._compressed = None
 
     def rope(self, x, pos):
-        cache = self._rotary._cos_sin_cache[pos.long()]
+        cache = self._rotary._cos_sin_cache[pos.long()].to(x.dtype)
         half = cache.shape[-1] // 2
         cos, sin = cache[:, :half, None].transpose(1, 2), cache[:, half:, None].transpose(1, 2)
-        # Same FP32 rotation / BF16 cast boundary as the reference indexer.
-        a, b = x[..., :half].float(), x[..., half : 2 * half].float()
+        # Match reference indexer RoPE: cache and each arithmetic result round to BF16.
+        a, b = x[..., :half], x[..., half : 2 * half]
         y = torch.cat((a * cos - b * sin, b * cos + a * sin), -1).to(x.dtype)
         return torch.cat((y, x[..., 2 * half :]), -1)
+
+    def select_decode_blocks(self, scores, ends):
+        if self.budget // self.ratio == 512:
+            from sglang.kernels.ops.elementwise.fast_topk import fast_topk
+
+            return fast_topk(scores, ends, topk=512, row_starts=None)
+        from sglang.srt.layers.attention.qsa.kernel import qsa_fast_topk
+
+        return qsa_fast_topk(scores, torch.zeros_like(ends), ends, self.budget // self.ratio)
+
+    def decode_scores(self, q, keys, positions):
+        return (
+            torch.relu(torch.einsum("bhd,bnd->bhn", q.float(), keys.float())).sum(1) / self.dim**0.5
+        )
+
+    def prefill_scores(self, q, keys, positions):
+        return (
+            torch.relu(torch.einsum("mhd,nd->mhn", q.float(), keys.float())).sum(1) / self.dim**0.5
+        )
 
     def forward(self, x):
         from sglang.srt.layers.attention.qsa.kernel import expand_qsa_block_indices, qsa_fast_topk
@@ -66,17 +85,13 @@ class QSAIndexer(BaseOP):
                 ((pos + 1) % self.ratio == 0)[:, None], compressed, old
             )
             keys = self._compressed[slots]
-            scores = (
-                torch.relu(torch.einsum("bhd,bnd->bhn", q.float(), keys.float())).sum(1)
-                / self.dim**0.5
-            )
+            scores = self.decode_scores(q, keys, pos)
             ends = ((pos + 1) // self.ratio).int()
             scores.masked_fill_(
-                torch.arange(nb, device=x.device)[None] >= ends[:, None], -float("inf")
+                torch.arange(scores.shape[-1], device=x.device)[None] >= ends[:, None],
+                -float("inf"),
             )
-            selected = qsa_fast_topk(
-                scores.contiguous(), torch.zeros_like(ends), ends, self.budget // self.ratio
-            )
+            selected = self.select_decode_blocks(scores.contiguous(), ends)
             indices = expand_qsa_block_indices(selected, pos, pos + 1, self.ratio, self.budget)
             physical = ctx.page_table[slots[:, None], indices.long().clamp_min(0)]
         else:
@@ -109,12 +124,7 @@ class QSAIndexer(BaseOP):
                     self._pending[slot, :tail] = keys[-tail:]
                 pos = batch.positions[offset : offset + n].long()
                 cached = self._compressed[slot, : max(1, end // self.ratio)]
-                scores = (
-                    torch.relu(
-                        torch.einsum("mhd,nd->mhn", q[offset : offset + n].float(), cached.float())
-                    ).sum(1)
-                    / self.dim**0.5
-                )
+                scores = self.prefill_scores(q[offset : offset + n], cached, pos)
                 ends = ((pos + 1) // self.ratio).int()
                 scores.masked_fill_(
                     torch.arange(cached.shape[0], device=x.device)[None] >= ends[:, None],

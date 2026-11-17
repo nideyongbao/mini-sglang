@@ -14,8 +14,8 @@ from minisgl.layers import (
     LinearRowParallel,
     OPList,
     ParallelLMHead,
-    RMSNorm,
     RadixLinearAttention,
+    RMSNorm,
     VocabParallelEmbedding,
 )
 from minisgl.utils import div_even, nvtx_annotate
@@ -97,6 +97,9 @@ class Qwen3_5GatedDeltaNet(BaseOP):
             A_log=None,
             dt_bias=None,
         )
+
+        # The Qwen38 reference rounds sigmoid(beta) before the recurrent update.
+        self.attn.round_beta = config.next_config is not None
 
         self.norm = RMSNorm(self.head_v_dim, eps=config.rms_norm_eps)
         self.out_proj = LinearRowParallel(

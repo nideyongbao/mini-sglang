@@ -1,0 +1,10 @@
+{
+  "0.0": {
+    "nonfinite": 0,
+    "elements": 768
+  },
+  "nan": {
+    "nonfinite": 768,
+    "elements": 768
+  }
+}

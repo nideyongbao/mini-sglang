@@ -9,12 +9,12 @@ from typing import Dict, List
 import torch
 import torch.nn.functional as F
 from minisgl.core import Req, get_global_ctx
-from minisgl.kvcache import BaseCacheHandle
 from minisgl.kernel.triton.causal_conv1d import (
     PAD_SLOT_ID,
-    causal_conv1d_update as triton_causal_conv1d_update,
 )
+from minisgl.kernel.triton.causal_conv1d import causal_conv1d_update as triton_causal_conv1d_update
 from minisgl.kernel.triton.gdn_decode import packed_decode as gdn_packed_decode
+from minisgl.kvcache import BaseCacheHandle
 
 from .base import BaseAttnBackend
 
@@ -430,6 +430,7 @@ class GDNAttnBackend:
             head_k_dim=layer.head_k_dim,
             head_v_dim=layer.head_v_dim,
             scale=layer.head_k_dim**-0.5,
+            round_beta=getattr(layer, "round_beta", False),
         )
         return core.unsqueeze(0)
 
@@ -525,6 +526,7 @@ class GDNAttnBackend:
                 head_k_dim=layer.head_k_dim,
                 head_v_dim=layer.head_v_dim,
                 scale=layer.head_k_dim**-0.5,
+                round_beta=getattr(layer, "round_beta", False),
             )
             out.index_copy_(0, indices, core_step.to(dtype=out.dtype))
         return out.unsqueeze(0)

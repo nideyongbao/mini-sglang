@@ -1,0 +1,20 @@
+{
+  "ids_equal": true,
+  "weights": {
+    "equal": false,
+    "max_abs": 2.2351741790771484e-08,
+    "mean_abs": 4.112371332354314e-09,
+    "rms": 6.494263793399568e-09,
+    "unequal": 1151,
+    "elements": 2560
+  },
+  "single_normalization_ids_equal": true,
+  "single_normalization_weights": {
+    "equal": false,
+    "max_abs": 2.9802322387695312e-08,
+    "mean_abs": 4.441244705333247e-09,
+    "rms": 7.210987362782362e-09,
+    "unequal": 1150,
+    "elements": 2560
+  }
+}

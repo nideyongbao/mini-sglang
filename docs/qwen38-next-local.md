@@ -60,3 +60,9 @@ curl http://127.0.0.1:31039/v1/chat/completions \
 输入 token、采样方式、checkpoint 固定。精度脚本既比较自由生成，也沿 SGLang 输出进行 teacher forcing，在相同历史下对比参考 top-20 token 的 logprob。默认绝对误差容限为 0.005，可通过 `--max-logprob-error` 修改。这是本实验的数值回归阈值，不是模型官方认证标准。
 
 随机模型中经常存在 BF16 概率并列：不同实现选择不同并列 token 后，后续自由生成会分叉。因此报告同时保留严格 top-1、参考并列集合命中率、自由生成一致率和 logprob 误差，不用单一指标宣称完全一致。该随机权重不能用于判断真实模型的语义质量。
+
+## 逐层对齐与修正
+
+默认路径已对齐参考的 GDN beta 舍入、shared-expert 融合及 indexer RoPE 舍入，并初始化 QSA decode gather scratch。HC 与 QSA prefill 仍保留本地快速核；参考 fast-topk 对并列候选也可能非确定，因此不承诺逐位复现参考服务。
+
+定位脚本和消融说明见 [alignment/README](../benchmark/qwen38/alignment/README.md)，实测精度、性能和正式权重部署计划见 [逐层对齐报告](qwen38-layerwise-alignment-report.md)。实验用替换器与确定性 top-k 均不作为生产启动参数。

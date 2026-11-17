@@ -1,0 +1,121 @@
+{
+  "valid_scores_equal": true,
+  "reference_width": 528,
+  "candidate_width": 528,
+  "min_score": 0.0,
+  "min_ties": 39,
+  "runs": [
+    {
+      "width": 528,
+      "run": 0,
+      "omitted": [
+        120
+      ]
+    },
+    {
+      "width": 528,
+      "run": 1,
+      "omitted": [
+        63
+      ]
+    },
+    {
+      "width": 528,
+      "run": 2,
+      "omitted": [
+        69
+      ]
+    },
+    {
+      "width": 528,
+      "run": 3,
+      "omitted": [
+        386
+      ]
+    },
+    {
+      "width": 528,
+      "run": 4,
+      "omitted": [
+        53
+      ]
+    },
+    {
+      "width": 528,
+      "run": 5,
+      "omitted": [
+        37
+      ]
+    },
+    {
+      "width": 528,
+      "run": 6,
+      "omitted": [
+        69
+      ]
+    },
+    {
+      "width": 528,
+      "run": 7,
+      "omitted": [
+        114
+      ]
+    },
+    {
+      "width": 1024,
+      "run": 0,
+      "omitted": [
+        370
+      ]
+    },
+    {
+      "width": 1024,
+      "run": 1,
+      "omitted": [
+        303
+      ]
+    },
+    {
+      "width": 1024,
+      "run": 2,
+      "omitted": [
+        63
+      ]
+    },
+    {
+      "width": 1024,
+      "run": 3,
+      "omitted": [
+        63
+      ]
+    },
+    {
+      "width": 1024,
+      "run": 4,
+      "omitted": [
+        69
+      ]
+    },
+    {
+      "width": 1024,
+      "run": 5,
+      "omitted": [
+        335
+      ]
+    },
+    {
+      "width": 1024,
+      "run": 6,
+      "omitted": [
+        319
+      ]
+    },
+    {
+      "width": 1024,
+      "run": 7,
+      "omitted": [
+        383
+      ]
+    }
+  ]
+}

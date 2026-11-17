@@ -178,8 +178,15 @@ class NextMoE(BaseOP):
         self.shared_expert_gate = LinearReplicated(config.hidden_size, 1, False)
 
     def forward(self, x):
-        shared = self.shared_expert.forward(x) * torch.sigmoid(self.shared_expert_gate.forward(x))
-        return self.experts.forward(x, self.gate.forward(x)) + shared
+        shared = self.shared_expert.forward(x)
+        routed = self.experts.forward(x, self.gate.forward(x))
+        if x.is_cuda:
+            from sglang.kernels.ops.elementwise.elementwise import fused_gate_sigmoid_mul_add
+
+            # Match the reference's single rounding boundary for the shared merge.
+            fused_gate_sigmoid_mul_add(x, self.shared_expert_gate.weight.squeeze(), shared, routed)
+            return routed
+        return routed + shared * torch.sigmoid(self.shared_expert_gate.forward(x))
 
 
 class NGramEmbedding(BaseOP):

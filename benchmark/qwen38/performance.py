@@ -11,6 +11,7 @@ from pathlib import Path
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--backend", choices=["mini", "sglang"], required=True)
+    p.add_argument("--ablation", default="production")
     p.add_argument("--model", default="/model")
     p.add_argument("--output", required=True)
     p.add_argument("--repeats", type=int, default=5)
@@ -19,6 +20,10 @@ def main():
     p.add_argument("--batches", type=int, nargs="+", default=[1, 4, 8])
     a = p.parse_args()
     if a.backend == "mini":
+        if a.ablation != "production":
+            from alignment.ablations import install
+
+            install(a.ablation)
         from minisgl.core import SamplingParams
         from minisgl.llm import LLM
 
@@ -66,6 +71,36 @@ def main():
 
     import torch
 
+    def validate(ids, n):
+        # Outside timed regions, check the actual sampled distributions.
+        if a.backend == "mini":
+            original_sample = engine.engine.sampler.sample
+
+            def checked_sample(logits, args):
+                assert torch.isfinite(logits).all(), "Nonfinite mini logits"
+                return original_sample(logits, args)
+
+            engine.engine.sampler.sample = checked_sample
+            try:
+                generate(ids, n)
+            finally:
+                engine.engine.sampler.sample = original_sample
+        else:
+            import math
+
+            out = engine.generate(
+                input_ids=ids,
+                sampling_params=dict(temperature=0, max_new_tokens=n, ignore_eos=True),
+                return_logprob=True,
+                top_logprobs_num=1,
+            )
+            assert all(
+                v is not None and math.isfinite(v)
+                for r in out
+                for top in r["meta_info"]["output_top_logprobs"]
+                for v, *_ in top
+            ), "Nonfinite reference logprobs"
+
     def timed(ids, n):
         torch.cuda.synchronize()
         start = time.perf_counter()
@@ -83,7 +118,7 @@ def main():
                 rng = random.Random(20261117 + length * 31 + batch)
                 ids = [[rng.randrange(100, 240000) for _ in range(length)] for _ in range(batch)]
                 for output in [1, 128]:
-                    timed(ids, output)
+                    validate(ids, output)
                     timed(ids, output)
                     times = [timed(ids, output) for _ in range(a.repeats)]
                     med = statistics.median(times)
@@ -102,7 +137,12 @@ def main():
                     Path(a.output).write_text(
                         json.dumps(
                             dict(
-                                backend=a.backend, context=a.context, repeats=a.repeats, rows=rows
+                                backend=a.backend,
+                                ablation=a.ablation,
+                                finite_preflight=True,
+                                context=a.context,
+                                repeats=a.repeats,
+                                rows=rows,
                             ),
                             indent=2,
                         )
