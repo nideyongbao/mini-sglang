@@ -44,10 +44,12 @@ class ModelConfig:
     linear_num_value_heads: int
 
     vision_config: dict | None = None
+    next_config: dict | None = None
+    quantization_config: dict | None = None
 
     @property
     def is_moe(self) -> bool:
-        return "moe" in self.model_type
+        return self.num_experts > 0
 
     @property
     def has_linear_layers(self) -> bool:
@@ -127,6 +129,8 @@ class ModelConfig:
         linear_num_value_heads = int(getattr(config, "linear_num_value_heads", 0))
 
         return cls(
+            next_config=config.to_dict() if model_type == "qwen4_exp_text" else None,
+            quantization_config=_get_attr(top, "quantization_config"),
             vision_config=(lambda v: v.to_dict() if hasattr(v, "to_dict") else v)(
                 _get_attr(top, "vision_config")
             ),
@@ -136,7 +140,7 @@ class ModelConfig:
             head_dim=head_dim,
             hidden_size=config.hidden_size,
             vocab_size=config.vocab_size,
-            intermediate_size=config.intermediate_size,
+            intermediate_size=getattr(config, "intermediate_size", moe_intermediate_size),
             hidden_act=config.hidden_act,
             rms_norm_eps=config.rms_norm_eps,
             tie_word_embeddings=tie_word_embeddings,

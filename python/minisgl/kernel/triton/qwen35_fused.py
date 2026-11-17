@@ -64,6 +64,7 @@ def _gated_rmsnorm_kernel(
     num_heads: tl.constexpr,
     head_dim: tl.constexpr,
     block_size: tl.constexpr,
+    sigmoid_gate: tl.constexpr,
 ):
     row = tl.program_id(0)
     token = row // num_heads
@@ -77,7 +78,7 @@ def _gated_rmsnorm_kernel(
     gates = tl.load(gate_ptr, mask=mask, other=0.0).to(tl.float32)
     weights = tl.load(weight + offsets, mask=mask, other=0.0).to(tl.float32)
     values *= tl.rsqrt(tl.sum(values * values) / head_dim + eps) * weights
-    values *= gates * tl.sigmoid(gates)
+    values *= tl.sigmoid(gates) if sigmoid_gate else gates * tl.sigmoid(gates)
     tl.store(core_ptr, values, mask=mask)
 
 
@@ -86,8 +87,9 @@ def gated_rmsnorm_(
     gate: torch.Tensor,
     weight: torch.Tensor,
     eps: float,
+    sigmoid_gate: bool = False,
 ) -> torch.Tensor:
-    """Apply RMSNorm and the SiLU gate in one launch, in place."""
+    """Apply RMSNorm and a SiLU (default) or sigmoid gate in one launch, in place."""
     if core.ndim != 3 or gate.ndim != 3 or core.shape != gate.shape:
         raise ValueError("core and gate must have identical [tokens, heads, dim] shapes")
     tokens, num_heads, head_dim = core.shape
@@ -104,6 +106,7 @@ def gated_rmsnorm_(
         num_heads,
         head_dim,
         block_size,
+        sigmoid_gate,
         num_warps=1,
         num_stages=2,
     )

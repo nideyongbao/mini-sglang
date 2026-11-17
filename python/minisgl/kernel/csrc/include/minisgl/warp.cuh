@@ -16,8 +16,10 @@ template <std::size_t kUnit> inline constexpr auto get_mem_package() {
     return uint2{};
   } else if constexpr (kUnit == 4) {
     return uint1{};
+  } else if constexpr (kUnit == 2) {
+    return static_cast<unsigned short>(0);
   } else {
-    static_assert(kUnit == 16 || kUnit == 8 || kUnit == 4,
+    static_assert(kUnit == 16 || kUnit == 8 || kUnit == 4 || kUnit == 2,
                   "Unsupported memory package size");
   }
 }
@@ -29,6 +31,8 @@ inline constexpr auto resolve_unit_size(std::size_t x) -> std::size_t {
     return 8;
   if (x % (4 * kWarpThreads) == 0)
     return 4;
+  if (x % (2 * kWarpThreads) == 0)
+    return 2;
   return 0; // trigger static assert in _get_mem_package
 }
 
@@ -45,7 +49,7 @@ __always_inline __device__ void copy(void *__restrict__ dst,
   constexpr auto kBytesPerLoop = sizeof(Package) * kWarpThreads;
   constexpr auto kLoopCount = kBytes / kBytesPerLoop;
   static_assert(kBytes % kBytesPerLoop == 0,
-                "kBytes must be multiple of 128 bytes");
+                "kBytes must be multiple of 64 bytes");
 
   const auto dst_packed = static_cast<Package *>(dst);
   const auto src_packed = static_cast<const Package *>(src);
@@ -65,7 +69,7 @@ __always_inline __device__ void reset(void *__restrict__ dst) {
   constexpr auto kBytesPerLoop = sizeof(Package) * kWarpThreads;
   constexpr auto kLoopCount = kBytes / kBytesPerLoop;
   static_assert(kBytes % kBytesPerLoop == 0,
-                "warp_copy: kBytes must be multiple of 128 bytes");
+                "warp_copy: kBytes must be multiple of 64 bytes");
 
   const auto dst_ = static_cast<Package *>(dst);
   const auto lane_id = threadIdx.x % kWarpThreads;

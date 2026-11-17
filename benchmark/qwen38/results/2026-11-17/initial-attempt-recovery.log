@@ -1,0 +1,19 @@
+minisgl-qwen38-dev
+sglang-qwen38-dflash2
+minisgl-qwen38-dev
+name, uuid, memory.used [MiB], utilization.gpu [%], temperature.gpu, power.draw [W]
+NVIDIA H20, GPU-669cd1a2-d2c7-add4-82dc-22d9263e8165, 0 MiB, 0 %, 49, 206.19 W
+Reference QSA packed attention uses sgl_kernel FA3
+Error response from daemon: No such container: sglang-qwen38-dflash2
+failed to start containers: sglang-qwen38-dflash2
+Error response from daemon: Couldn't find PID field in ps output
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+AssertionError
+Starting container: docker run --detach --rm --pull never --name sglang-qwen38-dflash2 --gpus all --ipc host --shm-size 32g --publish 0.0.0.0:8000:8000 --volume /shard_data/brooksli/models/Qwen/Qwen3.8-27B-FP8:/shard_data/brooksli/models/Qwen/Qwen3.8-27B-FP8:ro --volume /shard_data/brooksli/models/z-lab/Qwen3.8-27B-DFlash2:/shard_data/brooksli/models/z-lab/Qwen3.8-27B-DFlash2:ro --volume /shard_data/brooksli/workspace/logs:/var/log/sglang:rw --env CUDA_VISIBLE_DEVICES=0 --env SGLANG_LOG_FILE=/var/log/sglang/sglang-qwen38-dflash2-3.log --env HF_HUB_OFFLINE=1 --env TRANSFORMERS_OFFLINE=1 --env SGLANG_SKIP_SGL_KERNEL_VERSION_CHECK=1 --env SGLANG_JIT_DEEPGEMM_PRECOMPILE=0 --env DFLASH_ENABLE_FA3_COMPAT=1 --env NO_PROXY=127.0.0.1\,localhost\,::1 --env no_proxy=127.0.0.1\,localhost\,::1 --env TZ=Asia/Shanghai --entrypoint bash lmsysorg/sglang:dev-cu12-qwen38-27b-dflash2 -c $'printf "\\n===== SGLang start: %s =====\\n" "$(date +%Y-%m-%dT%H:%M:%S%z)" >> "$SGLANG_LOG_FILE"\nexec python -m sglang.launch_server "$@" >> "$SGLANG_LOG_FILE" 2>&1' sglang --model-path /shard_data/brooksli/models/Qwen/Qwen3.8-27B-FP8 --trust-remote-code --random-seed 420817 --tp-size 1 --dtype auto --context-length 262144 --mem-fraction-static 0.80 --kv-cache-dtype fp8_e4m3 --mamba-ssm-dtype bfloat16 --max-running-requests 32 --max-mamba-cache-size 32 --chunked-prefill-size 4096 --max-prefill-tokens 16384 --schedule-policy fcfs --attention-backend fa3 --cuda-graph-max-bs-decode 32 --cuda-graph-bs-decode 32 --watchdog-timeout 1800 --mamba-radix-cache-strategy extra_buffer --fp8-gemm-backend flashinfer_deepgemm --speculative-algorithm DFLASH --speculative-draft-model-path /shard_data/brooksli/models/z-lab/Qwen3.8-27B-DFlash2 --speculative-num-draft-tokens 8 --speculative-dflash-block-size 8 --speculative-draft-model-quantization unquant --speculative-draft-attention-backend fa3 --speculative-draft-kv-cache-dtype fp8_e4m3 --host 0.0.0.0 --port 8000 --served-model-name qwen --reasoning-parser qwen3 --tool-call-parser qwen3_coder --enable-metrics
+SGLang DFlash2 container started: sglang-qwen38-dflash2 (23b1baecc6a5ba301b5cdeff854a723c214500f3702bb76889ab65a2543cfc64)
+Endpoint: http://0.0.0.0:8000/v1
+Log file: /shard_data/brooksli/workspace/logs/sglang-qwen38-dflash2-3.log
+Logs:     tail -f /shard_data/brooksli/workspace/logs/sglang-qwen38-dflash2-3.log
+Stop:     docker stop sglang-qwen38-dflash2 sglang-prometheus sglang-grafana
+ORIGINAL_SERVICE_RESTORED_HEALTHY 2026-11-17T12:18:15+0800

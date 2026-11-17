@@ -150,6 +150,8 @@ class Engine:
                 k: torch.randn_like(v, device=self.device)
                 for k, v in self.model.state_dict().items()
             }
+        elif hasattr(self.model, "load_checkpoint"):
+            return self.model.load_checkpoint(config.model_path, self.device)
         else:
             return {k: v.to(self.dtype) for k, v in load_weight(config.model_path, self.device)}
 
@@ -239,6 +241,24 @@ def _align_up_32(num: int) -> int:
 def _adjust_config(config: EngineConfig):
     def override(attr: str, value: Any):  # this is dangerous, use with caution
         object.__setattr__(config, attr, value)
+
+    if config.model_config.next_config is not None:
+        if config.use_dummy_weight:
+            raise ValueError(
+                "Qwen38 local requires checkpoint PLE hash buffers; dummy weights are unsupported"
+            )
+        if config.tp_info.size != 1:
+            raise ValueError("Qwen38 local currently supports TP=1 only")
+        if config.dtype != torch.bfloat16:
+            raise ValueError("Qwen38 local requires BF16 activations")
+        budget = config.model_config.next_config["indexer_budget"]
+        if config.max_seq_len_override is None:
+            override("max_seq_len_override", budget)
+        if hasattr(config, "cache_type") and config.cache_type != "naive":
+            override("cache_type", "naive")
+            logger.warning_rank0("Qwen38 PLE state requires naive cache; prefix reuse disabled")
+        if config.attention_backend == "auto":
+            override("attention_backend", "fa")
 
     if config.attention_backend == "auto":
         backend = "trtllm" if is_sm100_supported() else ("fa,fi" if is_sm90_supported() else "fi")

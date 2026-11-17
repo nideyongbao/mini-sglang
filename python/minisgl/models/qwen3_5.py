@@ -62,6 +62,7 @@ class Qwen3_5GatedDeltaNet(BaseOP):
         key_dim = config.linear_num_key_heads * self.head_k_dim
         value_dim = config.linear_num_value_heads * self.head_v_dim
         self.hidden_act = config.hidden_act
+        self.sigmoid_gate = (config.next_config or {}).get("output_gate_type") == "sigmoid"
 
         self.in_proj_qkvz = self.create_qkvz_proj(
             hidden_size=config.hidden_size,
@@ -164,7 +165,7 @@ class Qwen3_5GatedDeltaNet(BaseOP):
         ).to(dtype=z.dtype)
 
         core = core.reshape(-1, self.num_v_heads, self.head_v_dim)
-        gated_rmsnorm_(core, z, self.norm.weight, self.norm.eps)
+        gated_rmsnorm_(core, z, self.norm.weight, self.norm.eps, self.sigmoid_gate)
         core = core.reshape(x.shape[0], -1)
         return self.out_proj.forward(core)
 

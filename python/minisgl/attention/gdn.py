@@ -188,8 +188,11 @@ class GDNAttnBackend:
         if state_i32 is None or state_i32.device != device:
             state_i32 = torch.empty(bs, dtype=torch.int32, device=device)
             self._capture_state_indices_i32[bs] = state_i32
-        for i, req in enumerate(reqs):
-            state_i32[i] = req.table_idx
+        # One pinned asynchronous copy avoids a CPU/GPU synchronization per slot.
+        host_indices = torch.tensor(
+            [req.table_idx for req in reqs], dtype=torch.int32, device="cpu", pin_memory=True
+        )
+        state_i32.copy_(host_indices, non_blocking=True)
 
     def prepare_for_replay(self, batch) -> None:
         bs = batch.padded_size
@@ -200,8 +203,11 @@ class GDNAttnBackend:
                 bs, dtype=torch.int32, device=get_global_ctx().page_table.device
             )
             self._capture_state_indices_i32[bs] = state_i32
-        for i, req in enumerate(reqs):
-            state_i32[i] = req.table_idx
+        # One pinned asynchronous copy avoids a CPU/GPU synchronization per slot.
+        host_indices = torch.tensor(
+            [req.table_idx for req in reqs], dtype=torch.int32, device="cpu", pin_memory=True
+        )
+        state_i32.copy_(host_indices, non_blocking=True)
         self._capture_active_bs = None
 
     def _apply_conv(
