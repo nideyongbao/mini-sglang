@@ -9,7 +9,10 @@ def main():
     p.add_argument("--backend", choices=["mini", "sglang"], required=True)
     p.add_argument("--directory", default="/tmp/qwen38-alignment")
     p.add_argument("--lengths", nargs="+", type=int, default=[16, 128, 2048])
-    p.add_argument("--variant", default="baseline")
+    p.add_argument("--variant", default="production")
+    p.add_argument("--mode", choices=["strict", "fast"], default="strict")
+    p.add_argument("--chunk", type=int, default=512)
+    p.add_argument("--mode-inputs", action="store_true")
     p.add_argument("--steps", type=int, default=8)
     p.add_argument("--batch", type=int, default=1)
     p.add_argument("--random", action="store_true")
@@ -22,6 +25,7 @@ def main():
     os.environ["QWEN38_TRACE_DIR"] = a.directory
     if a.stable_topk:
         os.environ["QWEN38_STABLE_TOPK"] = "1"
+    os.environ["MINISGL_QWEN38_REFERENCE_MODE"] = a.mode
     if a.backend == "mini":
         from probe import install_mini
 
@@ -38,10 +42,11 @@ def main():
 
         engine = LLM(
             "/model",
+            qwen38_mode=a.mode,
             max_running_req=a.batch,
             max_seq_len_override=4096,
-            num_page_override=8192,
-            max_extend_tokens=512,
+            num_page_override=32768,
+            max_extend_tokens=a.chunk,
             cuda_graph_bs=[],
             attention_backend="fa",
             cache_type="naive",
@@ -61,10 +66,11 @@ def main():
             fp8_gemm_runner_backend="triton",
             moe_runner_backend="triton",
             context_length=4096,
-            max_total_tokens=8192,
+            max_total_tokens=32768,
             max_running_requests=a.batch,
-            max_mamba_cache_size=4,
-            chunked_prefill_size=512,
+            max_mamba_cache_size=max(16, a.batch * 2),
+            chunked_prefill_size=a.chunk,
+            max_prefill_tokens=32768,
             mem_fraction_static=0.9,
             disable_cuda_graph=True,
             disable_radix_cache=True,
@@ -102,6 +108,11 @@ def main():
                 ]
             else:
                 ids = [[100 + (i + 37 * b) % 1000 for i in range(n)] for b in range(a.batch)]
+            if a.mode_inputs:
+                import random
+
+                rng = random.Random(20261117 + n * 31 + a.batch)
+                ids = [[rng.randrange(100, 240000) for _ in range(n)] for _ in range(a.batch)]
             arm.write_text(json.dumps(dict(case=case, prompt_length=n)))
             result = generate(ids)
             (root / f"{a.backend}-{a.variant}-{case}-output.json").write_text(

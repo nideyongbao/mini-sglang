@@ -1,0 +1,1654 @@
+{
+  "backend": "fast",
+  "repeats": 5,
+  "warmups": 2,
+  "updated_utc": "2026-11-17T06:59:26.868382+00:00",
+  "rows": [
+    {
+      "words": 128,
+      "batch": 1,
+      "input_tokens": 140,
+      "output_tokens": 128,
+      "median_batch_ms": 124.77879598736763,
+      "output_tokens_per_s": 1025.8153157124427,
+      "median_request_ms": 124.66852832585573,
+      "samples": [
+        {
+          "seconds": 0.124576929025352,
+          "requests": [
+            {
+              "seconds": 0.12442980986088514,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            }
+          ]
+        },
+        {
+          "seconds": 0.12493965681642294,
+          "requests": [
+            {
+              "seconds": 0.12480264995247126,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            }
+          ]
+        },
+        {
+          "seconds": 0.12483606301248074,
+          "requests": [
+            {
+              "seconds": 0.12470943573862314,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            }
+          ]
+        },
+        {
+          "seconds": 0.12426355760544538,
+          "requests": [
+            {
+              "seconds": 0.12414118926972151,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            }
+          ]
+        },
+        {
+          "seconds": 0.12477879598736763,
+          "requests": [
+            {
+              "seconds": 0.12466852832585573,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "words": 128,
+      "batch": 4,
+      "input_tokens": 140,
+      "output_tokens": 128,
+      "median_batch_ms": 150.51938872784376,
+      "output_tokens_per_s": 3401.5551373634294,
+      "median_request_ms": 149.19652417302132,
+      "samples": [
+        {
+          "seconds": 0.15303606167435646,
+          "requests": [
+            {
+              "seconds": 0.1517825247719884,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.1520387465134263,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.15184975787997246,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.1518168905749917,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            }
+          ]
+        },
+        {
+          "seconds": 0.14944875054061413,
+          "requests": [
+            {
+              "seconds": 0.1488514058291912,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.14845889434218407,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.14768363907933235,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.14766867645084858,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            }
+          ]
+        },
+        {
+          "seconds": 0.15033818036317825,
+          "requests": [
+            {
+              "seconds": 0.14976810477674007,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.14873932022601366,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.14852438680827618,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.14865483343601227,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            }
+          ]
+        },
+        {
+          "seconds": 0.1510595427826047,
+          "requests": [
+            {
+              "seconds": 0.14982703048735857,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.15051375143229961,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.1495648231357336,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.14875817764550447,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            }
+          ]
+        },
+        {
+          "seconds": 0.15051938872784376,
+          "requests": [
+            {
+              "seconds": 0.14938520547002554,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.1495149191468954,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.14876664523035288,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.1490078428760171,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "words": 128,
+      "batch": 8,
+      "input_tokens": 140,
+      "output_tokens": 128,
+      "median_batch_ms": 184.7321931272745,
+      "output_tokens_per_s": 5543.159438888365,
+      "median_request_ms": 181.97410507127643,
+      "samples": [
+        {
+          "seconds": 0.1847321931272745,
+          "requests": [
+            {
+              "seconds": 0.18240759894251823,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.18263736832886934,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.18305231723934412,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.18174432963132858,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.17996812611818314,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.18171756900846958,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.18095262348651886,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.17941125854849815,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            }
+          ]
+        },
+        {
+          "seconds": 0.18419299740344286,
+          "requests": [
+            {
+              "seconds": 0.18348094262182713,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.18207437358796597,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.18254707287997007,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.1809009201824665,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.18138464074581861,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.17868186067789793,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.17894390039145947,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.17885843012481928,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            }
+          ]
+        },
+        {
+          "seconds": 0.18710463400930166,
+          "requests": [
+            {
+              "seconds": 0.18662770185619593,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.18587952386587858,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.18417494650930166,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.18340176157653332,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.1826162589713931,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.18338458146899939,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.1829917225986719,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.18174178805202246,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            }
+          ]
+        },
+        {
+          "seconds": 0.18443514127284288,
+          "requests": [
+            {
+              "seconds": 0.18394950684159994,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.1815035492181778,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.1813504360616207,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.1818738365545869,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.1809659181162715,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.1811593770980835,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.17967355158179998,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.1771089704707265,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            }
+          ]
+        },
+        {
+          "seconds": 0.1860615974292159,
+          "requests": [
+            {
+              "seconds": 0.18374974094331264,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.18293130304664373,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.18453960679471493,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.18285591062158346,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.18342953640967607,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.18227852508425713,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.18023531511425972,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.18010793160647154,
+              "usage": {
+                "prompt_tokens": 140,
+                "completion_tokens": 128,
+                "total_tokens": 268,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "words": 2048,
+      "batch": 1,
+      "input_tokens": 2060,
+      "output_tokens": 128,
+      "median_batch_ms": 194.44430340081453,
+      "output_tokens_per_s": 658.286191784952,
+      "median_request_ms": 194.3006720393896,
+      "samples": [
+        {
+          "seconds": 0.19436028134077787,
+          "requests": [
+            {
+              "seconds": 0.19420426152646542,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            }
+          ]
+        },
+        {
+          "seconds": 0.19444430340081453,
+          "requests": [
+            {
+              "seconds": 0.1943006720393896,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            }
+          ]
+        },
+        {
+          "seconds": 0.19412326533347368,
+          "requests": [
+            {
+              "seconds": 0.19397622626274824,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            }
+          ]
+        },
+        {
+          "seconds": 0.1975583666935563,
+          "requests": [
+            {
+              "seconds": 0.19741089455783367,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            }
+          ]
+        },
+        {
+          "seconds": 0.19595139753073454,
+          "requests": [
+            {
+              "seconds": 0.19578323606401682,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "words": 2048,
+      "batch": 4,
+      "input_tokens": 2060,
+      "output_tokens": 128,
+      "median_batch_ms": 373.1603669002652,
+      "output_tokens_per_s": 1372.064252838626,
+      "median_request_ms": 371.11142883077264,
+      "samples": [
+        {
+          "seconds": 0.3743241559714079,
+          "requests": [
+            {
+              "seconds": 0.3736708788201213,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.37342037353664637,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.3721406180411577,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.37113766744732857,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            }
+          ]
+        },
+        {
+          "seconds": 0.3731603669002652,
+          "requests": [
+            {
+              "seconds": 0.37175293918699026,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.37212710455060005,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.37183292768895626,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.3710851902142167,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            }
+          ]
+        },
+        {
+          "seconds": 0.3732320135459304,
+          "requests": [
+            {
+              "seconds": 0.371828218922019,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.3725055670365691,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.37241011299192905,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.37054498866200447,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            }
+          ]
+        },
+        {
+          "seconds": 0.3691778043285012,
+          "requests": [
+            {
+              "seconds": 0.3679363923147321,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.36818829365074635,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.3679193193092942,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.36717777233570814,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            }
+          ]
+        },
+        {
+          "seconds": 0.37076858431100845,
+          "requests": [
+            {
+              "seconds": 0.3696000622585416,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.37009719759225845,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.3692930890247226,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.36834291461855173,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "words": 2048,
+      "batch": 8,
+      "input_tokens": 2060,
+      "output_tokens": 128,
+      "median_batch_ms": 609.2353845015168,
+      "output_tokens_per_s": 1680.795347824139,
+      "median_request_ms": 606.0143443755805,
+      "samples": [
+        {
+          "seconds": 0.6092093391343951,
+          "requests": [
+            {
+              "seconds": 0.6069958349689841,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.606544659473002,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.6073209848254919,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.6044738525524735,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.6064655100926757,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.6056760363280773,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.6040028817951679,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.6036465428769588,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            }
+          ]
+        },
+        {
+          "seconds": 0.6105079799890518,
+          "requests": [
+            {
+              "seconds": 0.6092938967049122,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.6078860340639949,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.6089516673237085,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.6082143811509013,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.6052368879318237,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.6062126597389579,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.6050348384305835,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.6047093290835619,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            }
+          ]
+        },
+        {
+          "seconds": 0.6092353845015168,
+          "requests": [
+            {
+              "seconds": 0.606798741966486,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.6081727705895901,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.6067627659067512,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.6068593803793192,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.6045615440234542,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.6048021502792835,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.6045208657160401,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.6045013600960374,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            }
+          ]
+        },
+        {
+          "seconds": 0.6113563170656562,
+          "requests": [
+            {
+              "seconds": 0.6105027440935373,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.6102465428411961,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.6076705800369382,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.6068041622638702,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.6079608518630266,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.6070750709623098,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.6062689991667867,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.6053238837048411,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            }
+          ]
+        },
+        {
+          "seconds": 0.6069184681400657,
+          "requests": [
+            {
+              "seconds": 0.6041560880839825,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.605379268527031,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.6058160290122032,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.6026744386181235,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.6027837079018354,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.6030291169881821,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.601358306594193,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            },
+            {
+              "seconds": 0.6017441721633077,
+              "usage": {
+                "prompt_tokens": 2060,
+                "completion_tokens": 128,
+                "total_tokens": 2188,
+                "prompt_tokens_details": {
+                  "image_tokens": 0
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

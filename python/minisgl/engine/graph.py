@@ -106,6 +106,7 @@ class GraphRunner:
         self.attn_backend = attn_backend
         self.max_graph_bs = max(cuda_graph_bs) if cuda_graph_bs else 0
         self.graph_bs_list = sorted(cuda_graph_bs)
+        self._exact_batches = getattr(model, "_qwen38_strict", False)
         self.dummy_req = dummy_req
         self.stream = stream
         self.device = device
@@ -161,7 +162,11 @@ class GraphRunner:
         logger.info_rank0(f"Free GPU memory after capturing CUDA graphs: {mem_GB(free_memory)}")
 
     def can_use_cuda_graph(self, batch: Batch) -> bool:
-        return batch.is_decode and batch.size <= self.max_graph_bs
+        return (
+            batch.is_decode
+            and batch.size <= self.max_graph_bs
+            and (not self._exact_batches or batch.size in self.graph_map)
+        )
 
     def replay(self, batch: Batch) -> torch.Tensor:
         assert self.can_use_cuda_graph(batch)

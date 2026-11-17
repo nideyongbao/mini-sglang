@@ -1,0 +1,12 @@
+[transformers] Unrecognized keys in `rope_parameters` for 'rope_type'='default': {'mrope_interleaved', 'mrope_section'}
+[1m[2026-11-17|06:56:32|core|rank=0][0m [32mINFO    [0m Qwen38 numerical mode: fast
+[1m[2026-11-17|06:56:32|core|rank=0][0m [32mINFO    [0m Auto-selected MoE backend: fused
+[1m[2026-11-17|06:56:32|core|rank=0][0m [32mINFO    [0m Free memory before loading model: 94.70 GiB
+[1m[2026-11-17|06:56:34|core|rank=0][0m [32mINFO    [0m Allocating 32768 tokens for KV cache, K + V = 0.03 GiB
+[1m[2026-11-17|06:56:34|core|rank=0][0m [32mINFO    [0m Free memory after initialization: 94.55 GiB
+[1m[2026-11-17|06:56:34|core|rank=0][0m [32mINFO    [0m Start capturing CUDA graphs with sizes: [1, 2, 3, 4, 5, 6, 7, 8]
+[1m[2026-11-17|06:56:34|core|rank=0][0m [32mINFO    [0m Free GPU memory before capturing CUDA graphs: 94.55 GiB
+Preparing for capturing CUDA graphs...:   0%|          | 0/8 [00:00<?, ?batch/s]Capturing graphs: bs = 8   | avail_mem = 94.55 GiB:   0%|          | 0/8 [00:00<?, ?batch/s]Capturing graphs: bs = 8   | avail_mem = 94.55 GiB:  12%|█▎        | 1/8 [00:02<00:17,  2.55s/batch]Capturing graphs: bs = 7   | avail_mem = 94.41 GiB:  12%|█▎        | 1/8 [00:02<00:17,  2.55s/batch]Capturing graphs: bs = 6   | avail_mem = 94.40 GiB:  12%|█▎        | 1/8 [00:02<00:17,  2.55s/batch]Capturing graphs: bs = 5   | avail_mem = 94.40 GiB:  12%|█▎        | 1/8 [00:02<00:17,  2.55s/batch]Capturing graphs: bs = 4   | avail_mem = 94.39 GiB:  12%|█▎        | 1/8 [00:02<00:17,  2.55s/batch]Capturing graphs: bs = 4   | avail_mem = 94.39 GiB:  62%|██████▎   | 5/8 [00:02<00:01,  2.48batch/s]Capturing graphs: bs = 3   | avail_mem = 94.39 GiB:  62%|██████▎   | 5/8 [00:02<00:01,  2.48batch/s]Capturing graphs: bs = 2   | avail_mem = 94.38 GiB:  62%|██████▎   | 5/8 [00:02<00:01,  2.48batch/s]Capturing graphs: bs = 1   | avail_mem = 94.38 GiB:  62%|██████▎   | 5/8 [00:02<00:01,  2.48batch/s]Capturing graphs: bs = 1   | avail_mem = 94.38 GiB: 100%|██████████| 8/8 [00:02<00:00,  2.92batch/s]
+[1m[2026-11-17|06:56:36|core|rank=0][0m [32mINFO    [0m Free GPU memory after capturing CUDA graphs: 94.37 GiB
+[1m[2026-11-17|06:56:36|core|rank=0][0m [32mINFO    [0m Prefix cache setup: cache_type=naive, has_linear_layers=True, linear_prefix_state_supported=True, disable_prefix_cache=False
+[transformers] Unrecognized keys in `rope_parameters` for 'rope_type'='default': {'mrope_interleaved', 'mrope_section'}

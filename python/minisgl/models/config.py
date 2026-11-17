@@ -43,6 +43,7 @@ class ModelConfig:
     linear_num_key_heads: int
     linear_num_value_heads: int
 
+    qwen38_mode: str = "strict"
     vision_config: dict | None = None
     next_config: dict | None = None
     quantization_config: dict | None = None

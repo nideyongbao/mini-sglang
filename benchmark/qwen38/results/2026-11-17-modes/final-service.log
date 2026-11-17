@@ -1,0 +1,5 @@
+Original service healthy before additional graph boundary checks
+{'frames': 320, 'exact': 320, 'logit_rows': 1680, 'top1': 1680, 'bitwise_rows': 1680, 'reference_tie_hits': 1680, 'top1_margin_max': 0.0, 'max_abs': 0.0, 'rms': 0.0}
+differences []
+db344b75554b8a7d51279528cc026e8379dcf64c11589f7bbdb39e9a033791ec
+PASS streaming, cancellation recovery, mixed lengths, slot reuse, repeatability

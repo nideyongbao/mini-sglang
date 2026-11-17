@@ -10,10 +10,13 @@ docker_cmd=(docker)
 if ! docker info >/dev/null 2>&1; then docker_cmd=(sudo -n docker); fi
 args=(run --rm --gpus all --shm-size 2g --pull never
   -v "$repo:/workspace" -v "$model:/model:ro" -v "$results:/results"
-  -e PYTHONPATH=/workspace/python -w /workspace)
+  -e PYTHONPATH=/workspace/python:/workspace/benchmark/qwen38/modes
+  -e QWEN38_MODE="${QWEN38_MODE:-strict}" -w /workspace)
 case "$mode" in
   test) command='python -m pytest tests/models/test_qwen38.py tests/kernel/test_qwen35_fused.py tests/core/test_attention_backend.py -q -o addopts=' ;;
   accuracy) command='python benchmark/qwen38/patch_reference.py
+    python benchmark/qwen38/alignment/patch_modes.py
+    export MINISGL_QWEN38_REFERENCE_MODE=strict
     bash benchmark/qwen38/reference.sh > /results/reference.log 2>&1 &
     reference_pid=$!
     trap "kill $reference_pid 2>/dev/null || true" EXIT
@@ -23,9 +26,14 @@ case "$mode" in
     python benchmark/qwen38/accuracy.py --graphs --padded-graphs --chunk 127 --output /results/accuracy-chunk127-padded.json
     python benchmark/qwen38/accuracy.py --graphs --padded-graphs --long --output /results/accuracy-long-padded.json' ;;
   performance) command='python benchmark/qwen38/patch_reference.py
-    python benchmark/qwen38/performance.py --backend sglang --output /results/performance-sglang.json
-    python benchmark/qwen38/performance.py --backend mini --output /results/performance-mini.json' ;;
+    python benchmark/qwen38/alignment/patch_modes.py
+    export MINISGL_QWEN38_REFERENCE_MODE=strict
+    python benchmark/qwen38/performance.py --backend sglang --fixed-continuation --output /results/performance-sglang.json
+    python benchmark/qwen38/performance.py --backend mini --mode strict --fixed-continuation --output /results/performance-strict.json
+    python benchmark/qwen38/performance.py --backend mini --mode fast --fixed-continuation --output /results/performance-fast.json' ;;
   online-sglang) command='python benchmark/qwen38/patch_reference.py
+    python benchmark/qwen38/alignment/patch_modes.py
+    export MINISGL_QWEN38_REFERENCE_MODE=strict
     bash benchmark/qwen38/reference.sh > /results/reference-online.log 2>&1 &
     reference_pid=$!
     trap "kill $reference_pid 2>/dev/null || true" EXIT

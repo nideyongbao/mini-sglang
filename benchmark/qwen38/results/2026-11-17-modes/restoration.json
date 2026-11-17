@@ -1,0 +1,14 @@
+{
+  "health_restored": "2026-11-17T15:02:37+0800",
+  "checks": {
+    "Image": true,
+    "Entrypoint": true,
+    "Cmd": true,
+    "environment_mapping": true,
+    "mount_mapping": true,
+    "ports": true
+  },
+  "note": "Environment and bind mount list ordering is not semantic.",
+  "service": "sglang-qwen38-dflash2",
+  "served_model": "qwen"
+}

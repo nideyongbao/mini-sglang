@@ -100,6 +100,9 @@ class Qwen3_5GatedDeltaNet(BaseOP):
 
         # The Qwen38 reference rounds sigmoid(beta) before the recurrent update.
         self.attn.round_beta = config.next_config is not None
+        self.attn.reference_decode = (
+            config.next_config is not None and config.qwen38_mode == "strict"
+        )
 
         self.norm = RMSNorm(self.head_v_dim, eps=config.rms_norm_eps)
         self.out_proj = LinearRowParallel(
@@ -168,7 +171,22 @@ class Qwen3_5GatedDeltaNet(BaseOP):
         ).to(dtype=z.dtype)
 
         core = core.reshape(-1, self.num_v_heads, self.head_v_dim)
-        gated_rmsnorm_(core, z, self.norm.weight, self.norm.eps, self.sigmoid_gate)
+        if self.attn.reference_decode:
+            from sglang.kernels.ops.attention.fla.layernorm_gated import layernorm_fn
+
+            core = layernorm_fn(
+                core.reshape(-1, self.head_v_dim),
+                self.norm.weight,
+                None,
+                z=z.reshape(-1, self.head_v_dim),
+                eps=self.norm.eps,
+                group_size=None,
+                norm_before_gate=True,
+                is_rms_norm=True,
+                activation="sigmoid" if self.sigmoid_gate else "swish",
+            )
+        else:
+            gated_rmsnorm_(core, z, self.norm.weight, self.norm.eps, self.sigmoid_gate)
         core = core.reshape(x.shape[0], -1)
         return self.out_proj.forward(core)
 

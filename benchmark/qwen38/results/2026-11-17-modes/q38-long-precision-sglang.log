@@ -1,0 +1,33 @@
+[transformers] Unrecognized keys in `rope_parameters` for 'rope_type'='default': {'mrope_section', 'mrope_interleaved'}
+[transformers] Unrecognized keys in `rope_parameters` for 'rope_type'='default': {'mrope_section', 'mrope_interleaved'}
+Breakable CUDA graph is incompatible with multimodal model; disabling prefill CUDA graph.
+[2026-11-17 06:55:33] Ignore import error when loading sglang.srt.multimodal.processors.inkling: Numba needs NumPy 2.4 or less. Got NumPy 2.5.
+[2026-11-17 06:55:33] Ignore import error when loading sglang.srt.multimodal.processors.sarashina2_vision: cannot import name 'MultimodalDataItem' from 'sglang.srt.managers.mm_utils' (/sgl-workspace/sglang/python/sglang/srt/managers/mm_utils.py)
+[transformers] Unrecognized keys in `rope_parameters` for 'rope_type'='default': {'mrope_section', 'mrope_interleaved'}
+[transformers] Unrecognized keys in `rope_parameters` for 'rope_type'='default': {'mrope_section', 'mrope_interleaved'}
+[2026-11-17 06:55:34] Ignore import error when loading sglang.srt.models.sarashina2_vision: cannot import name 'MultimodalDataItem' from 'sglang.srt.managers.mm_utils' (/sgl-workspace/sglang/python/sglang/srt/managers/mm_utils.py)
+[2026-11-17 06:55:36] Ignore import error when loading sglang.srt.multimodal.processors.inkling: Numba needs NumPy 2.4 or less. Got NumPy 2.5.
+[2026-11-17 06:55:36] Ignore import error when loading sglang.srt.multimodal.processors.sarashina2_vision: cannot import name 'MultimodalDataItem' from 'sglang.srt.managers.mm_utils' (/sgl-workspace/sglang/python/sglang/srt/managers/mm_utils.py)
+[transformers] Unrecognized keys in `rope_parameters` for 'rope_type'='default': {'mrope_section', 'mrope_interleaved'}
+[transformers] Unrecognized keys in `rope_parameters` for 'rope_type'='default': {'mrope_section', 'mrope_interleaved'}
+<frozen importlib._bootstrap_external>:1297: FutureWarning: The cuda.cudart module is deprecated and will be removed in a future release, please switch to use the cuda.bindings.runtime module instead.
+<frozen importlib._bootstrap_external>:1297: FutureWarning: The cuda.nvrtc module is deprecated and will be removed in a future release, please switch to use the cuda.bindings.nvrtc module instead.
+[transformers] Unrecognized keys in `rope_parameters` for 'rope_type'='default': {'mrope_section', 'mrope_interleaved'}
+[transformers] Unrecognized keys in `rope_parameters` for 'rope_type'='default': {'mrope_section', 'mrope_interleaved'}
+[transformers] Unrecognized keys in `rope_parameters` for 'rope_type'='default': {'mrope_section', 'mrope_interleaved'}
+[transformers] Unrecognized keys in `rope_parameters` for 'rope_type'='default': {'mrope_section', 'mrope_interleaved'}
+[transformers] Unrecognized keys in `rope_parameters` for 'rope_type'='default': {'mrope_section', 'mrope_interleaved'}
+[2026-11-17 06:55:40] Ignore import error when loading sglang.srt.multimodal.processors.inkling: Numba needs NumPy 2.4 or less. Got NumPy 2.5.
+[2026-11-17 06:55:41] Ignore import error when loading sglang.srt.multimodal.processors.sarashina2_vision: cannot import name 'MultimodalDataItem' from 'sglang.srt.managers.mm_utils' (/sgl-workspace/sglang/python/sglang/srt/managers/mm_utils.py)
+[2026-11-17 06:55:41] Ignore import error when loading sglang.srt.models.sarashina2_vision: cannot import name 'MultimodalDataItem' from 'sglang.srt.managers.mm_utils' (/sgl-workspace/sglang/python/sglang/srt/managers/mm_utils.py)
+[2026-11-17 06:55:41] using attn output gate!
+Multi-thread loading shards:   0% Completed | 0/1 [00:00<?, ?it/s]Multi-thread loading shards: 100% Completed | 1/1 [00:00<00:00, 10.05it/s]
+[transformers] Unrecognized keys in `rope_parameters` for 'rope_type'='default': {'mrope_section', 'mrope_interleaved'}
+[transformers] Unrecognized keys in `rope_parameters` for 'rope_type'='default': {'mrope_section', 'mrope_interleaved'}
+  0%|          | 0/8 [00:00<?, ?it/s]Capturing batches (bs=8 avail_mem=94.44 GB):   0%|          | 0/8 [00:00<?, ?it/s][2026-11-17 06:55:45] Using default MoE kernel config. Performance might be sub-optimal! Config file not found at /sgl-workspace/sglang/python/sglang/srt/layers/moe/moe_runner/triton_utils/configs/triton_3_7_1/E=32,N=128,device_name=NVIDIA_H20,dtype=fp8_w8a8,block_shape=[32, 32].json, you can create them with https://github.com/sgl-project/sglang/tree/main/benchmark/kernels/fused_moe_triton
+[2026-11-17 06:55:45] Using default MoE kernel config. Performance might be sub-optimal! Config file not found at /sgl-workspace/sglang/python/sglang/srt/layers/moe/moe_runner/triton_utils/configs/triton_3_7_1/E=32,N=128,device_name=NVIDIA_H20,dtype=fp8_w8a8,block_shape=[32, 32]_down.json, you can create them with https://github.com/sgl-project/sglang/tree/main/benchmark/kernels/fused_moe_triton
+Capturing batches (bs=8 avail_mem=94.44 GB):  12%|█▎        | 1/8 [00:01<00:07,  1.12s/it]Capturing batches (bs=7 avail_mem=94.32 GB):  12%|█▎        | 1/8 [00:01<00:07,  1.12s/it]Capturing batches (bs=7 avail_mem=94.32 GB):  25%|██▌       | 2/8 [00:01<00:03,  1.52it/s]Capturing batches (bs=6 avail_mem=94.31 GB):  25%|██▌       | 2/8 [00:01<00:03,  1.52it/s]Capturing batches (bs=5 avail_mem=94.30 GB):  25%|██▌       | 2/8 [00:01<00:03,  1.52it/s]Capturing batches (bs=5 avail_mem=94.30 GB):  50%|█████     | 4/8 [00:01<00:01,  3.47it/s]Capturing batches (bs=4 avail_mem=94.30 GB):  50%|█████     | 4/8 [00:01<00:01,  3.47it/s]Capturing batches (bs=3 avail_mem=94.29 GB):  50%|█████     | 4/8 [00:01<00:01,  3.47it/s]Capturing batches (bs=3 avail_mem=94.29 GB):  75%|███████▌  | 6/8 [00:01<00:00,  5.38it/s]Capturing batches (bs=2 avail_mem=94.28 GB):  75%|███████▌  | 6/8 [00:01<00:00,  5.38it/s]Capturing batches (bs=1 avail_mem=94.28 GB):  75%|███████▌  | 6/8 [00:01<00:00,  5.38it/s]Capturing batches (bs=1 avail_mem=94.28 GB): 100%|██████████| 8/8 [00:02<00:00,  5.57it/s]Capturing batches (bs=1 avail_mem=94.28 GB): 100%|██████████| 8/8 [00:02<00:00,  3.86it/s]
+[2026-11-17 06:55:46] Ignore import error when loading sglang.srt.multimodal.processors.inkling: Numba needs NumPy 2.4 or less. Got NumPy 2.5.
+[2026-11-17 06:55:46] Ignore import error when loading sglang.srt.multimodal.processors.sarashina2_vision: cannot import name 'MultimodalDataItem' from 'sglang.srt.managers.mm_utils' (/sgl-workspace/sglang/python/sglang/srt/managers/mm_utils.py)
+[transformers] Unrecognized keys in `rope_parameters` for 'rope_type'='default': {'mrope_section', 'mrope_interleaved'}
+[transformers] Unrecognized keys in `rope_parameters` for 'rope_type'='default': {'mrope_section', 'mrope_interleaved'}

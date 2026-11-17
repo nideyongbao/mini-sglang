@@ -2,7 +2,7 @@
 
 本分支为 `Qwen4ExpForConditionalGeneration` 的纯文本推理增加原生 Mini-SGLang 模型实现，目标权重为 `/shard_data/brooksli/models/tiny-random/qwen3.8-flash-next-fp8`。调度、请求状态、KV 分页、CUDA Graph 和 HTTP 服务由 Mini-SGLang 管理；复用镜像内 SGLang 的底层 FP8 MoE、QSA top-k 算子，不通过 SGLang Engine 转发请求。
 
-实测结果和限制见 [精度与性能报告](qwen38-next-local-report.md)。
+默认模式与最新实测见 [严格模式、CUDA graph 与性能报告](qwen38-strict-default-report.md)。早期结果保留在 [初始报告](qwen38-next-local-report.md)。
 
 ## 环境与启动
 
@@ -11,8 +11,11 @@
 在仓库根目录执行：
 
 ```bash
-# 启动原生 Mini-SGLang HTTP 服务，默认端口 31039
+# 启动严格模式（默认），CUDA graph batch 1–8，端口 31039
 bash benchmark/qwen38/run.sh serve
+
+# 可选快速模式：允许浮点舍入/稀疏选择差异
+QWEN38_MODE=fast bash benchmark/qwen38/run.sh serve
 
 # GPU 算子回归
 bash benchmark/qwen38/run.sh test
@@ -28,7 +31,7 @@ bash benchmark/qwen38/run.sh online-sglang
 bash benchmark/qwen38/run.sh online-mini
 ```
 
-脚本支持 `MODEL_PATH`、`IMAGE`、`RESULTS_PATH` 和服务模式的 `PORT` 环境变量；默认结果目录 `benchmark/qwen38/results/local`。脚本不会自动停止已有业务服务。首次运行需要 JIT 编译，编译和模型加载不计入稳态性能。
+脚本支持 `MODEL_PATH`、`IMAGE`、`RESULTS_PATH`、`QWEN38_MODE` 和服务模式的 `PORT` 环境变量；默认结果目录 `benchmark/qwen38/results/local`。脚本不会自动停止已有业务服务。首次运行需要 JIT 编译，编译和模型加载不计入稳态性能。
 
 ```bash
 curl http://127.0.0.1:31039/v1/chat/completions \
@@ -40,7 +43,7 @@ curl http://127.0.0.1:31039/v1/chat/completions \
 
 - TP=1、BF16 激活、block-FP8 routed experts、BF16 shared expert。
 - GDN 使用该架构的 sigmoid 输出门，支持 head_dim=32 的 RoPE、embedding 和 KV 存储。
-- HyperConnection 分组 Gemma RMSNorm、低秩输入混合和残差注入；目标 tiny 配置提供融合 Triton 实现。
+- HyperConnection 分组 Gemma RMSNorm、低秩输入混合和残差注入；严格模式复用参考实现，快速模式为 tiny 配置提供融合 Triton 核。
 - PLE 数字顺序拼接 FP8 embedding 分片，保留 int64 哈希参数、EOS 边界、跨 chunk 的 n-gram 和卷积状态。
 - QSA 压缩 key、因果块选择与尾部 token，预填充采用稀疏 attention，解码打包选中的 KV 后调用 FA3。
 - 请求槽位复用时重置 PLE/QSA 历史；支持跨压缩块边界的 chunked prefill 和 CUDA Graph 解码。
@@ -63,6 +66,10 @@ curl http://127.0.0.1:31039/v1/chat/completions \
 
 ## 逐层对齐与修正
 
-默认路径已对齐参考的 GDN beta 舍入、shared-expert 融合及 indexer RoPE 舍入，并初始化 QSA decode gather scratch。HC 与 QSA prefill 仍保留本地快速核；参考 fast-topk 对并列候选也可能非确定，因此不承诺逐位复现参考服务。
+`--qwen38-mode strict` 是 API/CLI 默认值；`LLM(..., qwen38_mode="fast")` 或 CLI `--qwen38-mode fast` 显式启用快速模式。模式在模型构造时固定，不在运行中全局替换 Mini-SGLang 算子。
 
-定位脚本和消融说明见 [alignment/README](../benchmark/qwen38/alignment/README.md)，实测精度、性能和正式权重部署计划见 [逐层对齐报告](qwen38-layerwise-alignment-report.md)。实验用替换器与确定性 top-k 均不作为生产启动参数。
+严格模式复用参考 HC、GDN recurrence/门控 norm、MoE router/activation/reduction、QSA indexer 准备/评分/prefill attention 路径，使用稳定按 block ID 决胜的 QSA top-k。参考 SGLang 必须启用同样的确定性策略才能谈逐位一致；原 fast-topk 在并列项上非确定，固定随机种子不能解决。
+
+CUDA graph 开启。服务脚本显式捕获 batch 1–8；严格模式遇到未捕获的 batch 会走 eager，不补虚拟请求。自定义部署可用 `--cuda-graph-bs 1 2 3 4 5 6 7 8` 指定。快速模式保留原 graph padding 策略。
+
+定位过程见 [逐层报告](qwen38-layerwise-alignment-report.md)，最新数值、性能、部署限制及复现命令见 [严格默认模式报告](qwen38-strict-default-report.md)。旧报告的“默认快速路径”是历史配置，已由本轮严格默认模式取代。

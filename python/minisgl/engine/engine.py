@@ -243,6 +243,7 @@ def _adjust_config(config: EngineConfig):
         object.__setattr__(config, attr, value)
 
     if config.model_config.next_config is not None:
+        logger.info_rank0(f"Qwen38 numerical mode: {config.qwen38_mode}")
         if config.use_dummy_weight:
             raise ValueError(
                 "Qwen38 local requires checkpoint PLE hash buffers; dummy weights are unsupported"

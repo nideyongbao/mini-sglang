@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from functools import cached_property
 from typing import TYPE_CHECKING, List
 
@@ -29,9 +29,12 @@ class EngineConfig:
     use_pynccl: bool = True
     max_seq_len_override: int | None = None
     num_page_override: int | None = None  # if not None, will override the number of pages
+    qwen38_mode: str = "strict"
     image_cache_size_mb: int = 100  # MiB per model/rank; 0 disables cross-request image reuse
 
     def __post_init__(self):
+        if self.qwen38_mode not in ("strict", "fast"):
+            raise ValueError("qwen38_mode must be strict or fast")
         if self.image_cache_size_mb < 0:
             raise ValueError("image_cache_size_mb must be non-negative")
 
@@ -43,7 +46,7 @@ class EngineConfig:
     def model_config(self) -> ModelConfig:
         from minisgl.models import ModelConfig
 
-        return ModelConfig.from_hf(self.hf_config)
+        return replace(ModelConfig.from_hf(self.hf_config), qwen38_mode=self.qwen38_mode)
 
     @property
     def max_seq_len(self) -> int:

@@ -1,7 +1,9 @@
 """Like-for-like offline generate latency; execute backends serially on an idle GPU."""
 
 import argparse
+import hashlib
 import json
+import os
 import random
 import statistics
 import time
@@ -12,13 +14,27 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("--backend", choices=["mini", "sglang"], required=True)
     p.add_argument("--ablation", default="production")
+    p.add_argument("--mode", choices=["strict", "fast"], default="strict")
+    p.add_argument("--reference-policy", choices=["strict", "original"], default="strict")
+    p.add_argument("--fixed-continuation", action="store_true")
+    p.add_argument("--retain-local-gdn", action="store_true")
+    p.add_argument("--eager", action="store_true")
     p.add_argument("--model", default="/model")
     p.add_argument("--output", required=True)
+    p.add_argument("--chunk", type=int, default=32768)
     p.add_argument("--repeats", type=int, default=5)
     p.add_argument("--context", type=int, default=4096)
     p.add_argument("--lengths", type=int, nargs="+", default=[128, 512, 1536, 3072])
     p.add_argument("--batches", type=int, nargs="+", default=[1, 4, 8])
     a = p.parse_args()
+    os.environ["MINISGL_QWEN38_REFERENCE_MODE"] = a.reference_policy
+    if a.fixed_continuation:
+        os.environ["QWEN38_FIXED_CONTINUATION"] = "1"
+    if a.retain_local_gdn:
+        from minisgl.kernel.triton.gdn_decode import packed_decode
+        from minisgl.models import qwen3_8_reference
+
+        qwen3_8_reference.reference_decode = packed_decode
     if a.backend == "mini":
         if a.ablation != "production":
             from alignment.ablations import install
@@ -29,15 +45,21 @@ def main():
 
         engine = LLM(
             a.model,
+            qwen38_mode=a.mode,
             max_running_req=8,
             max_seq_len_override=a.context,
             num_page_override=32768,
-            max_extend_tokens=512,
-            cuda_graph_bs=list(range(1, 9)),
+            max_extend_tokens=a.chunk,
+            cuda_graph_bs=[] if a.eager else list(range(1, 9)),
             attention_backend="fa",
             cache_type="naive",
             use_pynccl=False,
         )
+
+        if a.fixed_continuation:
+            from modes.mode_probe import install_fixed_continuation_mini
+
+            install_fixed_continuation_mini(engine)
 
         def generate(ids, n):
             return engine.generate(ids, SamplingParams(max_tokens=n, ignore_eos=True))
@@ -55,10 +77,12 @@ def main():
             max_total_tokens=32768,
             max_running_requests=8,
             max_mamba_cache_size=16,
-            chunked_prefill_size=512,
+            chunked_prefill_size=a.chunk,
+            max_prefill_tokens=32768,
             mem_fraction_static=0.9,
             cuda_graph_bs_decode=list(range(1, 9)),
             disable_cuda_graph_padding=True,
+            disable_cuda_graph=a.eager,
             disable_radix_cache=True,
             log_level="warning",
         )
@@ -109,6 +133,8 @@ def main():
         elapsed = time.perf_counter() - start
         key = "token_ids" if a.backend == "mini" else "output_ids"
         assert len(out) == len(ids) and all(len(r[key]) == n for r in out), (n, out)
+        if a.fixed_continuation:
+            assert all(set(r[key]) == {1000} for r in out), "Continuation was not forced"
         return elapsed
 
     rows = []
@@ -123,6 +149,7 @@ def main():
                     times = [timed(ids, output) for _ in range(a.repeats)]
                     med = statistics.median(times)
                     row = dict(
+                        input_sha256=hashlib.sha256(json.dumps(ids).encode()).hexdigest(),
                         batch=batch,
                         input_tokens=length,
                         output_tokens=output,
@@ -139,8 +166,14 @@ def main():
                             dict(
                                 backend=a.backend,
                                 ablation=a.ablation,
+                                mode=a.mode,
+                                fixed_continuation=a.fixed_continuation,
+                                reference_policy=a.reference_policy,
+                                graphs=not a.eager,
+                                retain_local_gdn=a.retain_local_gdn,
                                 finite_preflight=True,
                                 context=a.context,
+                                chunk=a.chunk,
                                 repeats=a.repeats,
                                 rows=rows,
                             ),

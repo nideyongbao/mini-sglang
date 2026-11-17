@@ -55,6 +55,7 @@ def _combine(y, x, normed, weight, hc, hs):
 class HyperConnection(BaseOP):
     def __init__(self, config, combine=True):
         c = config.next_config
+        self._strict = config.qwen38_mode == "strict"
         self.hc, self.hs = c["hc_count"], config.hidden_size
         self._tiny = self.hc == 4 and self.hs == 32 and c["hc_lowrank"] == 4
         size = self.hc * self.hs
@@ -65,6 +66,10 @@ class HyperConnection(BaseOP):
             self.block_inject_weight = LinearReplicated(size, self.hc, False)
 
     def mix(self, x):
+        if self._strict:
+            from .qwen3_8_reference import reference_hc
+
+            return reference_hc(self).mix(x)
         if self._tiny and x.is_cuda:
             from minisgl.kernel.triton.qwen38 import tiny_hc_mix
 
@@ -88,6 +93,10 @@ class HyperConnection(BaseOP):
         ), (x, normed)
 
     def combine(self, y, residual):
+        if self._strict:
+            from .qwen3_8_reference import reference_hc
+
+            return reference_hc(self).combine(y, residual)
         if self._tiny and y.is_cuda:
             from minisgl.kernel.triton.qwen38 import tiny_hc_combine
 
@@ -97,6 +106,7 @@ class HyperConnection(BaseOP):
 
 class FP8Experts(BaseOP):
     def __init__(self, config):
+        self._strict = config.qwen38_mode == "strict"
         self.block_shape = list(config.quantization_config["weight_block_size"])
         e, h, m = config.num_experts, config.hidden_size, config.moe_intermediate_size
         bn, bk = self.block_shape
@@ -117,6 +127,11 @@ class FP8Experts(BaseOP):
         from minisgl.moe.fused import fused_topk, moe_align_block_size
         from sglang.kernels.ops.moe.fused_moe_triton_kernels import invoke_fused_moe_kernel
 
+        if self._strict:
+            from sglang.kernels.ops.activation.activation import silu_and_mul
+            from sglang.srt.layers.moe.topk import fused_topk
+
+            from .qwen3_8_reference import reference_moe_reduce as moe_sum_reduce_triton
         weights, ids = fused_topk(x, logits, self.top_k, True)
         config = dict(
             BLOCK_SIZE_M=64,
@@ -359,6 +374,7 @@ class Qwen38ForCausalLM(BaseLLMModel):
     def __init__(self, config):
         if not config.quantization_config or config.quantization_config["quant_method"] != "fp8":
             raise ValueError("Qwen38 local requires a block-FP8 checkpoint")
+        self._qwen38_strict = config.qwen38_mode == "strict"
         self.model = NextModel(config)
         self.lm_head = ParallelLMHead(config.vocab_size, config.hidden_size)
         self._config = config

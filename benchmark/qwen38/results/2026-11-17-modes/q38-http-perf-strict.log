@@ -1,0 +1,6 @@
+{"words": 128, "batch": 1, "input_tokens": 140, "output_tokens": 128, "median_batch_ms": 169.4801254197955, "output_tokens_per_s": 755.2507981862127, "median_request_ms": 169.3585179746151}
+{"words": 128, "batch": 4, "input_tokens": 140, "output_tokens": 128, "median_batch_ms": 218.56291685253382, "output_tokens_per_s": 2342.5748858643324, "median_request_ms": 216.48813132196665}
+{"words": 128, "batch": 8, "input_tokens": 140, "output_tokens": 128, "median_batch_ms": 257.78686348348856, "output_tokens_per_s": 3972.2737852605433, "median_request_ms": 252.7910303324461}
+{"words": 2048, "batch": 1, "input_tokens": 2060, "output_tokens": 128, "median_batch_ms": 274.32233933359385, "output_tokens_per_s": 466.60436153667985, "median_request_ms": 274.15905613452196}
+{"words": 2048, "batch": 4, "input_tokens": 2060, "output_tokens": 128, "median_batch_ms": 555.8047238737345, "output_tokens_per_s": 921.1868449616022, "median_request_ms": 553.3783161081374}
+{"words": 2048, "batch": 8, "input_tokens": 2060, "output_tokens": 128, "median_batch_ms": 913.1896598264575, "output_tokens_per_s": 1121.344278246209, "median_request_ms": 910.2549711242318}

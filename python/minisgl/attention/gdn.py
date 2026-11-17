@@ -417,7 +417,10 @@ class GDNAttnBackend:
             rt,
             state_indices_i32=state_indices_i32,
         )
-        core = gdn_packed_decode(
+        decode = gdn_packed_decode
+        if getattr(layer, "reference_decode", False):
+            from minisgl.models.qwen3_8_reference import reference_decode as decode
+        core = decode(
             mixed_qkv=conv_qkv.contiguous(),
             a=a.contiguous(),
             b=b.contiguous(),

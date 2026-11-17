@@ -1,0 +1,177 @@
+{
+  "initial": {
+    "id": "ba4dc3110432458791d135285eee9a64",
+    "object": "chat.completion",
+    "created": 1794898689,
+    "model": "/model",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": " vitamininanders Fi\u0e25\u0e47\u5e99 quieras Au\u00dfmarkupesion Mathematicqualifiedklin Pio \u0441\u0443\u0432\u0abe<unsigned",
+          "reasoning_content": null,
+          "tool_calls": null
+        },
+        "logprobs": null,
+        "finish_reason": "length",
+        "matched_stop": null
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 140,
+      "total_tokens": 156,
+      "completion_tokens": 16,
+      "prompt_tokens_details": null,
+      "reasoning_tokens": 0
+    },
+    "metadata": {
+      "weight_version": "default"
+    }
+  },
+  "stream_matches": true,
+  "slot_reuse_requests": [
+    {
+      "prompt_tokens": 140,
+      "total_tokens": 148,
+      "completion_tokens": 8,
+      "prompt_tokens_details": null,
+      "reasoning_tokens": 0
+    },
+    {
+      "prompt_tokens": 140,
+      "total_tokens": 149,
+      "completion_tokens": 9,
+      "prompt_tokens_details": null,
+      "reasoning_tokens": 0
+    },
+    {
+      "prompt_tokens": 140,
+      "total_tokens": 150,
+      "completion_tokens": 10,
+      "prompt_tokens_details": null,
+      "reasoning_tokens": 0
+    },
+    {
+      "prompt_tokens": 140,
+      "total_tokens": 151,
+      "completion_tokens": 11,
+      "prompt_tokens_details": null,
+      "reasoning_tokens": 0
+    },
+    {
+      "prompt_tokens": 140,
+      "total_tokens": 152,
+      "completion_tokens": 12,
+      "prompt_tokens_details": null,
+      "reasoning_tokens": 0
+    },
+    {
+      "prompt_tokens": 140,
+      "total_tokens": 153,
+      "completion_tokens": 13,
+      "prompt_tokens_details": null,
+      "reasoning_tokens": 0
+    },
+    {
+      "prompt_tokens": 140,
+      "total_tokens": 154,
+      "completion_tokens": 14,
+      "prompt_tokens_details": null,
+      "reasoning_tokens": 0
+    },
+    {
+      "prompt_tokens": 140,
+      "total_tokens": 155,
+      "completion_tokens": 15,
+      "prompt_tokens_details": null,
+      "reasoning_tokens": 0
+    },
+    {
+      "prompt_tokens": 140,
+      "total_tokens": 148,
+      "completion_tokens": 8,
+      "prompt_tokens_details": null,
+      "reasoning_tokens": 0
+    },
+    {
+      "prompt_tokens": 140,
+      "total_tokens": 149,
+      "completion_tokens": 9,
+      "prompt_tokens_details": null,
+      "reasoning_tokens": 0
+    },
+    {
+      "prompt_tokens": 140,
+      "total_tokens": 150,
+      "completion_tokens": 10,
+      "prompt_tokens_details": null,
+      "reasoning_tokens": 0
+    },
+    {
+      "prompt_tokens": 140,
+      "total_tokens": 151,
+      "completion_tokens": 11,
+      "prompt_tokens_details": null,
+      "reasoning_tokens": 0
+    },
+    {
+      "prompt_tokens": 140,
+      "total_tokens": 152,
+      "completion_tokens": 12,
+      "prompt_tokens_details": null,
+      "reasoning_tokens": 0
+    },
+    {
+      "prompt_tokens": 140,
+      "total_tokens": 153,
+      "completion_tokens": 13,
+      "prompt_tokens_details": null,
+      "reasoning_tokens": 0
+    },
+    {
+      "prompt_tokens": 140,
+      "total_tokens": 154,
+      "completion_tokens": 14,
+      "prompt_tokens_details": null,
+      "reasoning_tokens": 0
+    },
+    {
+      "prompt_tokens": 140,
+      "total_tokens": 155,
+      "completion_tokens": 15,
+      "prompt_tokens_details": null,
+      "reasoning_tokens": 0
+    }
+  ],
+  "after_disconnect": {
+    "id": "a4c959cf188a43a8889482b963ad2dc2",
+    "object": "chat.completion",
+    "created": 1794898689,
+    "model": "/model",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": " vitamininanders Fi\u0e25\u0e47\u5e99 quieras Au\u00dfmarkupesion Mathematicqualifiedklin Pio \u0441\u0443\u0432\u0abe<unsigned",
+          "reasoning_content": null,
+          "tool_calls": null
+        },
+        "logprobs": null,
+        "finish_reason": "length",
+        "matched_stop": null
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 140,
+      "total_tokens": 156,
+      "completion_tokens": 16,
+      "prompt_tokens_details": null,
+      "reasoning_tokens": 0
+    },
+    "metadata": {
+      "weight_version": "default"
+    }
+  }
+}

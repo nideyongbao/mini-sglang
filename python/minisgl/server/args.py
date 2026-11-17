@@ -146,6 +146,14 @@ def parse_args(args: List[str], run_shell: bool = False) -> Tuple[ServerArgs, bo
     )
 
     parser.add_argument(
+        "--cuda-graph-bs",
+        type=int,
+        nargs="+",
+        default=ServerArgs.cuda_graph_bs,
+        help="Explicit batch sizes to capture. Strict Qwen38 uses eager execution for uncaptured sizes.",
+    )
+
+    parser.add_argument(
         "--cuda-graph-max-bs",
         "--graph",
         type=int,
@@ -228,6 +236,13 @@ def parse_args(args: List[str], run_shell: bool = False) -> Tuple[ServerArgs, bo
         "--shell-mode",
         action="store_true",
         help="Run the server in shell mode.",
+    )
+
+    parser.add_argument(
+        "--qwen38-mode",
+        choices=["strict", "fast"],
+        default="strict",
+        help="Qwen38 numerical policy: reference-aligned strict (default) or faster approximate kernels.",
     )
 
     # Parse arguments

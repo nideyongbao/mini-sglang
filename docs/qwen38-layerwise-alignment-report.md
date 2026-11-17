@@ -1,5 +1,7 @@
 # Qwen3.8 Flash Next：逐层精度定位与算子消融
 
+> 后续严格默认模式、CUDA graph 精度及独占性能已补充在 [新报告](qwen38-strict-default-report.md)。本文中的默认路径和“尚未测量”均描述当时版本。
+
 日期：2026-11-17。分支：`feat/qwen38-next-local`。本报告承接 `qwen38-next-local-report.md`，新增中间张量证据；此前源码审计中的“可能原因”不作为本轮结论。
 
 ## 实验边界

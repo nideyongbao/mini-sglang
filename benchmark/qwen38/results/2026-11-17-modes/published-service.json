@@ -1,0 +1,29 @@
+{
+  "endpoint": "http://127.0.0.1:31039/v1",
+  "original_health": 200,
+  "content_matches_reference": true,
+  "response": {
+    "id": "chatcmpl-20",
+    "object": "chat.completion",
+    "created": 1794899334,
+    "model": "/model",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": " vitamininanders Fi\u0e25\u0e47\u5e99 quieras Au\u00dfmarkupesion Mathematicqualifiedklin Pio \u0441\u0443\u0432\u0abe<unsigned"
+        },
+        "finish_reason": "length"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 140,
+      "completion_tokens": 16,
+      "total_tokens": 156,
+      "prompt_tokens_details": {
+        "image_tokens": 0
+      }
+    }
+  }
+}

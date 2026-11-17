@@ -12,6 +12,7 @@ from .utils import RopeAttn
 
 class QSAIndexer(BaseOP):
     def __init__(self, config, rotary):
+        self._strict = config.qwen38_mode == "strict"
         c = config.next_config
         self.nh, self.dim = c["indexer_n_heads"], c["indexer_head_dim"]
         self.ratio, self.budget = c["indexer_compress_ratio"], c["indexer_budget"]
@@ -34,6 +35,10 @@ class QSAIndexer(BaseOP):
         return torch.cat((y, x[..., 2 * half :]), -1)
 
     def select_decode_blocks(self, scores, ends):
+        if self._strict:
+            from .qwen3_8_reference import stable_topk
+
+            return stable_topk(scores, ends, self.budget // self.ratio)
         if self.budget // self.ratio == 512:
             from sglang.kernels.ops.elementwise.fast_topk import fast_topk
 
@@ -43,11 +48,19 @@ class QSAIndexer(BaseOP):
         return qsa_fast_topk(scores, torch.zeros_like(ends), ends, self.budget // self.ratio)
 
     def decode_scores(self, q, keys, positions):
+        if self._strict:
+            from .qwen3_8_reference import reference_decode_scores
+
+            return reference_decode_scores(self, q, keys, positions)
         return (
             torch.relu(torch.einsum("bhd,bnd->bhn", q.float(), keys.float())).sum(1) / self.dim**0.5
         )
 
     def prefill_scores(self, q, keys, positions):
+        if self._strict:
+            from .qwen3_8_reference import reference_prefill_scores
+
+            return reference_prefill_scores(self, q, keys, positions)
         return (
             torch.relu(torch.einsum("mhd,nd->mhn", q.float(), keys.float())).sum(1) / self.dim**0.5
         )
@@ -59,14 +72,21 @@ class QSAIndexer(BaseOP):
         batch = ctx.batch
         slots_count, maxlen = ctx.page_table.shape
         nb = (maxlen + self.ratio - 1) // self.ratio
+        if self._strict:
+            nb = ((nb + 63) // 64) * 64
         if self._pending is None:
             self._pending = x.new_zeros(slots_count, self.ratio, self.dim)
             self._compressed = x.new_zeros(slots_count, nb, self.dim)
         qk = self.index_qk_proj.forward(x)
-        q = self.q_layernorm.forward(qk[:, : self.nh * self.dim].reshape(-1, self.dim)).reshape(
-            -1, self.nh, self.dim
-        )
-        q = self.rope(q, batch.positions)
+        if self._strict:
+            from .qwen3_8_reference import reference_index_q
+
+            q = reference_index_q(self, qk, batch.positions)
+        else:
+            q = self.q_layernorm.forward(qk[:, : self.nh * self.dim].reshape(-1, self.dim)).reshape(
+                -1, self.nh, self.dim
+            )
+            q = self.rope(q, batch.positions)
         k = qk[:, self.nh * self.dim :]
         if batch.is_decode:
             fb = get_forward_context().forward_batch
@@ -75,10 +95,17 @@ class QSAIndexer(BaseOP):
             ).long()
             pos = batch.positions.long()
             self._pending[slots, pos % self.ratio] = k
-            pooled = self._pending[slots].float().mean(1).to(x.dtype)
-            compressed = self.rope(
-                self.k_layernorm.forward(pooled)[:, None], (pos // self.ratio) * self.ratio
-            )[:, 0]
+            if self._strict:
+                from .qwen3_8_reference import reference_index_k
+
+                compressed = reference_index_k(
+                    self, self._pending[slots], (pos // self.ratio) * self.ratio
+                )
+            else:
+                pooled = self._pending[slots].float().mean(1).to(x.dtype)
+                compressed = self.rope(
+                    self.k_layernorm.forward(pooled)[:, None], (pos // self.ratio) * self.ratio
+                )[:, 0]
             block = (pos // self.ratio).clamp(max=nb - 1)
             old = self._compressed[slots, block]
             self._compressed[slots, block] = torch.where(
@@ -108,17 +135,18 @@ class QSAIndexer(BaseOP):
                 groups = keys.shape[0] // self.ratio
                 first = start // self.ratio
                 if groups:
-                    pooled = (
-                        keys[: groups * self.ratio]
-                        .reshape(groups, self.ratio, self.dim)
-                        .float()
-                        .mean(1)
-                        .to(x.dtype)
-                    )
                     positions = torch.arange(first, first + groups, device=x.device) * self.ratio
-                    self._compressed[slot, first : first + groups] = self.rope(
-                        self.k_layernorm.forward(pooled)[:, None], positions
-                    )[:, 0]
+                    key_groups = keys[: groups * self.ratio].reshape(groups, self.ratio, self.dim)
+                    if self._strict:
+                        from .qwen3_8_reference import reference_index_k
+
+                        compressed = reference_index_k(self, key_groups, positions)
+                    else:
+                        pooled = key_groups.float().mean(1).to(x.dtype)
+                        compressed = self.rope(
+                            self.k_layernorm.forward(pooled)[:, None], positions
+                        )[:, 0]
+                    self._compressed[slot, first : first + groups] = compressed
                 tail = end % self.ratio
                 if tail:
                     self._pending[slot, :tail] = keys[-tail:]
@@ -130,9 +158,14 @@ class QSAIndexer(BaseOP):
                     torch.arange(cached.shape[0], device=x.device)[None] >= ends[:, None],
                     -float("inf"),
                 )
-                selected = qsa_fast_topk(
-                    scores.contiguous(), torch.zeros_like(ends), ends, self.budget // self.ratio
-                )
+                if self._strict:
+                    from .qwen3_8_reference import stable_topk
+
+                    selected = stable_topk(scores.contiguous(), ends, self.budget // self.ratio)
+                else:
+                    selected = qsa_fast_topk(
+                        scores.contiguous(), torch.zeros_like(ends), ends, self.budget // self.ratio
+                    )
                 indices = expand_qsa_block_indices(selected, pos, pos + 1, self.ratio, self.budget)
                 physical_parts.append(
                     torch.where(indices >= 0, ctx.page_table[slot, indices.long().clamp_min(0)], -1)
@@ -147,6 +180,7 @@ class QSAAttention(RopeAttn):
         super().__init__(
             config, layer_id, has_qk_norm=True, has_attn_output_gate=True, use_gemma_norm=True
         )
+        self._strict = config.qwen38_mode == "strict"
         self.indexer = QSAIndexer(config, self.attn.rotary)
         self.budget = config.next_config["indexer_budget"]
 
@@ -154,7 +188,7 @@ class QSAAttention(RopeAttn):
         ctx = get_global_ctx()
         batch = ctx.batch
         # Exact dense equivalence when the entire configured context fits the budget.
-        if ctx.page_table.shape[1] <= self.budget:
+        if not self._strict and ctx.page_table.shape[1] <= self.budget:
             return super().forward(x)
         indices = self.indexer.forward(x)
         qdim, kdim = self.attn.qo_attn_dim, self.attn.kv_attn_dim
@@ -178,6 +212,8 @@ class QSAAttention(RopeAttn):
         )
         vcache = ctx.kv_cache.v_cache(self.attn.layer_id).view_as(kcache)
         fn = sparse_decode if batch.is_decode else sparse_attention
+        if self._strict and not batch.is_decode:
+            from .qwen3_8_reference import reference_prefill as fn
         out = fn(
             q.reshape(-1, self.attn.num_qo_heads, self.attn.head_dim), kcache, vcache, indices
         ).flatten(1)
