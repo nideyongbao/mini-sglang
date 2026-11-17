@@ -19,6 +19,8 @@ def main():
     p.add_argument("--fixed-continuation", action="store_true")
     p.add_argument("--retain-local-gdn", action="store_true")
     p.add_argument("--eager", action="store_true")
+    p.add_argument("--prompts-json", help="Prepared prompt cases; requires --batches 1")
+    p.add_argument("--warmups", type=int, default=2)
     p.add_argument("--model", default="/model")
     p.add_argument("--output", required=True)
     p.add_argument("--chunk", type=int, default=32768)
@@ -27,6 +29,15 @@ def main():
     p.add_argument("--lengths", type=int, nargs="+", default=[128, 512, 1536, 3072])
     p.add_argument("--batches", type=int, nargs="+", default=[1, 4, 8])
     a = p.parse_args()
+    prepared = None
+    if a.prompts_json:
+        assert a.batches == [1], "Prepared prompts require single-request execution"
+        prepared = {
+            len(c["input_ids"]): c["input_ids"]
+            for c in json.loads(Path(a.prompts_json).read_text())
+        }
+        a.lengths = list(prepared)
+    assert a.warmups >= 1
     os.environ["MINISGL_QWEN38_REFERENCE_MODE"] = a.reference_policy
     if a.fixed_continuation:
         os.environ["QWEN38_FIXED_CONTINUATION"] = "1"
@@ -143,9 +154,12 @@ def main():
             for batch in a.batches:
                 rng = random.Random(20261117 + length * 31 + batch)
                 ids = [[rng.randrange(100, 240000) for _ in range(length)] for _ in range(batch)]
+                if prepared is not None:
+                    ids = [prepared[length]]
                 for output in [1, 128]:
                     validate(ids, output)
-                    timed(ids, output)
+                    for _ in range(a.warmups - 1):
+                        timed(ids, output)
                     times = [timed(ids, output) for _ in range(a.repeats)]
                     med = statistics.median(times)
                     row = dict(
@@ -175,6 +189,7 @@ def main():
                                 context=a.context,
                                 chunk=a.chunk,
                                 repeats=a.repeats,
+                                warmups=a.warmups,
                                 rows=rows,
                             ),
                             indent=2,

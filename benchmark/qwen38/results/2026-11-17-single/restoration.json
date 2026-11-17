@@ -1,0 +1,61 @@
+{
+  "checks": {
+    "/sglang-qwen38-dflash2": {
+      "Image": true,
+      "Cmd": true,
+      "Entrypoint": true,
+      "image_id": true,
+      "environment_mapping": true,
+      "mount_mapping": true,
+      "ports": true,
+      "running": true
+    },
+    "/minisgl-qwen38-strict": {
+      "Image": true,
+      "Cmd": true,
+      "Entrypoint": true,
+      "image_id": true,
+      "environment_mapping": true,
+      "mount_mapping": true,
+      "ports": true,
+      "running": true
+    }
+  },
+  "ready": [
+    [
+      "http://127.0.0.1:8000/health",
+      "2026-11-17T15:31:27+0800"
+    ],
+    [
+      "http://127.0.0.1:31039/v1/models",
+      "2026-11-17T15:31:43+0800"
+    ]
+  ],
+  "original_health": 200,
+  "original_model": "qwen",
+  "strict_natural_generation_matches_previous": true,
+  "strict_response": {
+    "id": "chatcmpl-0",
+    "object": "chat.completion",
+    "created": 1794900746,
+    "model": "/model",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": " vitamininanders Fi\u0e25\u0e47\u5e99 quieras Au\u00dfmarkupesion Mathematicqualifiedklin Pio \u0441\u0443\u0432\u0abe<unsigned"
+        },
+        "finish_reason": "length"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 140,
+      "completion_tokens": 16,
+      "total_tokens": 156,
+      "prompt_tokens_details": {
+        "image_tokens": 0
+      }
+    }
+  }
+}

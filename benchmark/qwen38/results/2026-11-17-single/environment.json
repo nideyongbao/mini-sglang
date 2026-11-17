@@ -1,0 +1,43 @@
+{
+  "image": "lmsysorg/sglang:dev-cu12-qwen38-next-local",
+  "image_id": "sha256:51eb4a3747ac86e2c46ad925302fc38aa3fe0095728e9dd90654f0d266205145",
+  "sglang_commit": "4ccff141dbe992794f9da6c3aa23535b4f72000d",
+  "gpu": "NVIDIA H20",
+  "parent_implementation_commit": "68ea5a1",
+  "chunk": 512,
+  "concurrency": 1,
+  "graphs": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "description": "Fixed continuation; measured calls=810; no production operator changes",
+  "source_sha256": {
+    "benchmark/qwen38/single/audit.py": "79bc12cc1ced9b59fe3126e262985c4fb63d5f603946169d40f544d2df6c97fc",
+    "benchmark/qwen38/single/serve_mini.py": "11190bdf052edf81ad3592406c10834dfb4c2dc83fd875840cf8d07ebe7fe9f3",
+    "benchmark/qwen38/single/serve_sglang.py": "43964354a998732d14178b0636d43ee497c7fd7c4a2c58a0bbd5388f5f1edb0c",
+    "benchmark/qwen38/single/client.py": "3c9d9be0021ae2cf365b250f966021b7aa2c2cb2e151e1968eeb7e4c27c0c26d",
+    "benchmark/qwen38/single/analyze.py": "f5915659f1cd3da265b187b2956dda800ce3e8452857441b8b2100620e23b3e7",
+    "benchmark/qwen38/performance.py": "db9fff4dc7d06e43823e03d9bb1baeda7b02415f75ebdc79252b02018cefdb14"
+  },
+  "checkpoint_sha256": {
+    "config.json": "eceefbbadd7cad4aa915adc6bb07069a9d743c77881912a385641d819efb02c3",
+    "generation_config.json": "e70c136c1b78ddc1fb0905bac8e733a4dc448d4f852a5dd75143fffc70be550e",
+    ".gitattributes": "34448b82c17d60fec9b65b1f093c115ddbaadc04beb1b0140b6bfed2e012a930",
+    ".meta.json": "0fd0ecb278fd4328d4c6aa2f89130093233f2783cc2eef6983545fb3737174bc",
+    "README.md": "fa69b3cc759d60c7b07fdff46e1ced18aa9313667fbbb73533d474a81f31e048",
+    "chat_template.jinja": "c3cf9e34abf4f9e36c2d72165aa9c132d3e2a725b6c2586aaa3a8af9d7a81041",
+    "preprocessor_config.json": "27225450ac9c6529872ee1924fcb0962ff5634834f817040f444118116f4e516",
+    "video_preprocessor_config.json": "7768af27c1fafa9cc9011c1dc20067e03f8915e03b63504550e11d5066986d13",
+    "tokenizer_config.json": "b11349aafa7cdc6a320767cf7ceb29ed82f7eda5d65e8e0819e76f0ce947bf27",
+    "merges.txt": "a9d356d7bdf1ef4949e3e748e95b8e10ad9d4e2e838eddc38a0a7b6b94d1db8d",
+    "vocab.json": "ce99b4cb2983d118806ce0a8b777a35b093e2000a503ebde25853284c9dfa003",
+    "tokenizer.json": "0997f410c57a1f4e53b09e4be8f4a172d90edd9564368fb0847030937229b9f3",
+    "model.safetensors": "1be8d3a864c25cdf7c6dc7cdca2f45b34f20e52a6fd316be66a09b9d5bba620b"
+  }
+}

@@ -1,0 +1,31 @@
+[transformers] Unrecognized keys in `rope_parameters` for 'rope_type'='default': {'mrope_interleaved', 'mrope_section'}
+[1m[2026-11-17|07:27:54|core|rank=0][0m [32mINFO    [0m Qwen38 numerical mode: fast
+[1m[2026-11-17|07:27:54|core|rank=0][0m [32mINFO    [0m Auto-selected MoE backend: fused
+[1m[2026-11-17|07:27:54|core|rank=0][0m [32mINFO    [0m Free memory before loading model: 94.70 GiB
+[1m[2026-11-17|07:27:56|core|rank=0][0m [32mINFO    [0m Allocating 32768 tokens for KV cache, K + V = 0.03 GiB
+[1m[2026-11-17|07:27:56|core|rank=0][0m [32mINFO    [0m Free memory after initialization: 94.55 GiB
+[1m[2026-11-17|07:27:56|core|rank=0][0m [32mINFO    [0m Start capturing CUDA graphs with sizes: [1, 2, 3, 4, 5, 6, 7, 8]
+[1m[2026-11-17|07:27:56|core|rank=0][0m [32mINFO    [0m Free GPU memory before capturing CUDA graphs: 94.55 GiB
+
+Preparing for capturing CUDA graphs...:   0%|          | 0/8 [00:00<?, ?batch/s]
+Capturing graphs: bs = 8   | avail_mem = 94.55 GiB:   0%|          | 0/8 [00:00<?, ?batch/s]
+Capturing graphs: bs = 8   | avail_mem = 94.55 GiB:  12%|█▎        | 1/8 [00:02<00:17,  2.56s/batch]
+Capturing graphs: bs = 7   | avail_mem = 94.41 GiB:  12%|█▎        | 1/8 [00:02<00:17,  2.56s/batch]
+Capturing graphs: bs = 6   | avail_mem = 94.40 GiB:  12%|█▎        | 1/8 [00:02<00:17,  2.56s/batch]
+Capturing graphs: bs = 5   | avail_mem = 94.40 GiB:  12%|█▎        | 1/8 [00:02<00:17,  2.56s/batch]
+Capturing graphs: bs = 4   | avail_mem = 94.39 GiB:  12%|█▎        | 1/8 [00:02<00:17,  2.56s/batch]
+Capturing graphs: bs = 4   | avail_mem = 94.39 GiB:  62%|██████▎   | 5/8 [00:02<00:01,  2.47batch/s]
+Capturing graphs: bs = 3   | avail_mem = 94.39 GiB:  62%|██████▎   | 5/8 [00:02<00:01,  2.47batch/s]
+Capturing graphs: bs = 2   | avail_mem = 94.38 GiB:  62%|██████▎   | 5/8 [00:02<00:01,  2.47batch/s]
+Capturing graphs: bs = 1   | avail_mem = 94.38 GiB:  62%|██████▎   | 5/8 [00:02<00:01,  2.47batch/s]
+Capturing graphs: bs = 1   | avail_mem = 94.38 GiB: 100%|██████████| 8/8 [00:02<00:00,  4.24batch/s]
+Capturing graphs: bs = 1   | avail_mem = 94.38 GiB: 100%|██████████| 8/8 [00:02<00:00,  2.83batch/s]
+[1m[2026-11-17|07:27:58|core|rank=0][0m [32mINFO    [0m Free GPU memory after capturing CUDA graphs: 94.37 GiB
+[1m[2026-11-17|07:27:58|core|rank=0][0m [32mINFO    [0m Prefix cache setup: cache_type=naive, has_linear_layers=True, linear_prefix_state_supported=True, disable_prefix_cache=False
+[transformers] Unrecognized keys in `rope_parameters` for 'rope_type'='default': {'mrope_interleaved', 'mrope_section'}
+{"input_sha256": "e93409fe6e5cbec507874b5c0e89c4fe6c9abcbe80257749431f50606ae5ac41", "batch": 1, "input_tokens": 140, "output_tokens": 1, "median_ms": 13.455003499984741, "min_ms": 13.330294750630856, "max_ms": 13.567676767706871, "output_tokens_per_s": 74.32179411927571, "seconds": [0.013502159155905247, 0.013420209288597107, 0.013567676767706871, 0.013348830863833427, 0.01339771505445242, 0.013425509445369244, 0.013440404087305069, 0.013455003499984741, 0.01350486371666193, 0.013398315757513046, 0.013330294750630856, 0.013539200648665428, 0.01352883130311966, 0.0135158346965909, 0.01353318803012371]}
+{"input_sha256": "e93409fe6e5cbec507874b5c0e89c4fe6c9abcbe80257749431f50606ae5ac41", "batch": 1, "input_tokens": 140, "output_tokens": 128, "median_ms": 122.29663040488958, "min_ms": 120.47530617564917, "max_ms": 123.78403171896935, "output_tokens_per_s": 1046.635541602644, "seconds": [0.1225872253999114, 0.12259773444384336, 0.12281539291143417, 0.12230549845844507, 0.12160088866949081, 0.12239461299031973, 0.12047530617564917, 0.12259695865213871, 0.12229663040488958, 0.12105091195553541, 0.12220759317278862, 0.12378403171896935, 0.12083085812628269, 0.12187931686639786, 0.12105840910226107]}
+{"input_sha256": "5a0990578008312499f87308cc0ecaa520295569e0e2f4c45d01696e515884d9", "batch": 1, "input_tokens": 2060, "output_tokens": 1, "median_ms": 66.6373586282134, "min_ms": 66.34724419564009, "max_ms": 68.91003623604774, "output_tokens_per_s": 15.006597208920775, "seconds": [0.06688117515295744, 0.06706802546977997, 0.06647846475243568, 0.06650379206985235, 0.06869872193783522, 0.0666373586282134, 0.06655782088637352, 0.06647397298365831, 0.06687131244689226, 0.06657507177442312, 0.06643152330070734, 0.06665593851357698, 0.06891003623604774, 0.06634724419564009, 0.0666732108220458]}
+{"input_sha256": "5a0990578008312499f87308cc0ecaa520295569e0e2f4c45d01696e515884d9", "batch": 1, "input_tokens": 2060, "output_tokens": 128, "median_ms": 189.16103802621365, "min_ms": 187.10959143936634, "max_ms": 194.23838704824448, "output_tokens_per_s": 676.672116708632, "seconds": [0.18916103802621365, 0.19237117283046246, 0.18923018407076597, 0.18822978902608156, 0.18710959143936634, 0.1889911675825715, 0.18961820751428604, 0.19423838704824448, 0.18861093930900097, 0.19069908559322357, 0.18923100177198648, 0.18796425964683294, 0.18909084144979715, 0.18805785663425922, 0.19046963937580585]}
+{"input_sha256": "aa3e69a0eb2196a31cf397c2833336c207742219542871a311a5e5cb264e2059", "batch": 1, "input_tokens": 3084, "output_tokens": 1, "median_ms": 92.42381900548935, "min_ms": 91.94437135010958, "max_ms": 94.71926186233759, "output_tokens_per_s": 10.819721699020105, "seconds": [0.09235055465251207, 0.09471926186233759, 0.09239017870277166, 0.09269084874540567, 0.09242381900548935, 0.09266669861972332, 0.09412548504769802, 0.09217990282922983, 0.09224736038595438, 0.09194437135010958, 0.09240507986396551, 0.09368691127747297, 0.09399615228176117, 0.09221010562032461, 0.09326421096920967]}
+{"input_sha256": "aa3e69a0eb2196a31cf397c2833336c207742219542871a311a5e5cb264e2059", "batch": 1, "input_tokens": 3084, "output_tokens": 128, "median_ms": 214.81788996607065, "min_ms": 212.01719529926777, "max_ms": 219.22403760254383, "output_tokens_per_s": 595.853539108018, "seconds": [0.21734792180359364, 0.21228195633739233, 0.21340224333107471, 0.2128943456336856, 0.21481788996607065, 0.21689805947244167, 0.21460761222988367, 0.2149305623024702, 0.21201719529926777, 0.21530655305832624, 0.21516656503081322, 0.213881004601717, 0.21922403760254383, 0.2142947418615222, 0.21739335730671883]}

@@ -1,0 +1,56 @@
+[transformers] Unrecognized keys in `rope_parameters` for 'rope_type'='default': {'mrope_interleaved', 'mrope_section'}
+[transformers] Unrecognized keys in `rope_parameters` for 'rope_type'='default': {'mrope_interleaved', 'mrope_section'}
+Breakable CUDA graph is incompatible with multimodal model; disabling prefill CUDA graph.
+[2026-11-17 07:24:19] Ignore import error when loading sglang.srt.multimodal.processors.inkling: Numba needs NumPy 2.4 or less. Got NumPy 2.5.
+[2026-11-17 07:24:20] Ignore import error when loading sglang.srt.multimodal.processors.sarashina2_vision: cannot import name 'MultimodalDataItem' from 'sglang.srt.managers.mm_utils' (/sgl-workspace/sglang/python/sglang/srt/managers/mm_utils.py)
+[transformers] Unrecognized keys in `rope_parameters` for 'rope_type'='default': {'mrope_interleaved', 'mrope_section'}
+[transformers] Unrecognized keys in `rope_parameters` for 'rope_type'='default': {'mrope_interleaved', 'mrope_section'}
+[2026-11-17 07:24:20] Ignore import error when loading sglang.srt.models.sarashina2_vision: cannot import name 'MultimodalDataItem' from 'sglang.srt.managers.mm_utils' (/sgl-workspace/sglang/python/sglang/srt/managers/mm_utils.py)
+[2026-11-17 07:24:23] Ignore import error when loading sglang.srt.multimodal.processors.inkling: Numba needs NumPy 2.4 or less. Got NumPy 2.5.
+[2026-11-17 07:24:23] Ignore import error when loading sglang.srt.multimodal.processors.sarashina2_vision: cannot import name 'MultimodalDataItem' from 'sglang.srt.managers.mm_utils' (/sgl-workspace/sglang/python/sglang/srt/managers/mm_utils.py)
+[transformers] Unrecognized keys in `rope_parameters` for 'rope_type'='default': {'mrope_interleaved', 'mrope_section'}
+[transformers] Unrecognized keys in `rope_parameters` for 'rope_type'='default': {'mrope_interleaved', 'mrope_section'}
+<frozen importlib._bootstrap_external>:1297: FutureWarning: The cuda.cudart module is deprecated and will be removed in a future release, please switch to use the cuda.bindings.runtime module instead.
+<frozen importlib._bootstrap_external>:1297: FutureWarning: The cuda.nvrtc module is deprecated and will be removed in a future release, please switch to use the cuda.bindings.nvrtc module instead.
+[transformers] Unrecognized keys in `rope_parameters` for 'rope_type'='default': {'mrope_interleaved', 'mrope_section'}
+[transformers] Unrecognized keys in `rope_parameters` for 'rope_type'='default': {'mrope_interleaved', 'mrope_section'}
+[transformers] Unrecognized keys in `rope_parameters` for 'rope_type'='default': {'mrope_interleaved', 'mrope_section'}
+[transformers] Unrecognized keys in `rope_parameters` for 'rope_type'='default': {'mrope_interleaved', 'mrope_section'}
+[transformers] Unrecognized keys in `rope_parameters` for 'rope_type'='default': {'mrope_interleaved', 'mrope_section'}
+[2026-11-17 07:24:27] Ignore import error when loading sglang.srt.multimodal.processors.inkling: Numba needs NumPy 2.4 or less. Got NumPy 2.5.
+[2026-11-17 07:24:27] Ignore import error when loading sglang.srt.multimodal.processors.sarashina2_vision: cannot import name 'MultimodalDataItem' from 'sglang.srt.managers.mm_utils' (/sgl-workspace/sglang/python/sglang/srt/managers/mm_utils.py)
+[2026-11-17 07:24:28] Ignore import error when loading sglang.srt.models.sarashina2_vision: cannot import name 'MultimodalDataItem' from 'sglang.srt.managers.mm_utils' (/sgl-workspace/sglang/python/sglang/srt/managers/mm_utils.py)
+[2026-11-17 07:24:28] using attn output gate!
+
+Multi-thread loading shards:   0% Completed | 0/1 [00:00<?, ?it/s]
+Multi-thread loading shards: 100% Completed | 1/1 [00:00<00:00, 10.15it/s]
+[transformers] Unrecognized keys in `rope_parameters` for 'rope_type'='default': {'mrope_interleaved', 'mrope_section'}
+[transformers] Unrecognized keys in `rope_parameters` for 'rope_type'='default': {'mrope_interleaved', 'mrope_section'}
+
+  0%|          | 0/8 [00:00<?, ?it/s]
+Capturing batches (bs=8 avail_mem=94.44 GB):   0%|          | 0/8 [00:00<?, ?it/s][2026-11-17 07:24:31] Using default MoE kernel config. Performance might be sub-optimal! Config file not found at /sgl-workspace/sglang/python/sglang/srt/layers/moe/moe_runner/triton_utils/configs/triton_3_7_1/E=32,N=128,device_name=NVIDIA_H20,dtype=fp8_w8a8,block_shape=[32, 32].json, you can create them with https://github.com/sgl-project/sglang/tree/main/benchmark/kernels/fused_moe_triton
+[2026-11-17 07:24:31] Using default MoE kernel config. Performance might be sub-optimal! Config file not found at /sgl-workspace/sglang/python/sglang/srt/layers/moe/moe_runner/triton_utils/configs/triton_3_7_1/E=32,N=128,device_name=NVIDIA_H20,dtype=fp8_w8a8,block_shape=[32, 32]_down.json, you can create them with https://github.com/sgl-project/sglang/tree/main/benchmark/kernels/fused_moe_triton
+
+Capturing batches (bs=8 avail_mem=94.44 GB):  12%|█▎        | 1/8 [00:01<00:07,  1.12s/it]
+Capturing batches (bs=7 avail_mem=94.32 GB):  12%|█▎        | 1/8 [00:01<00:07,  1.12s/it]
+Capturing batches (bs=7 avail_mem=94.32 GB):  25%|██▌       | 2/8 [00:01<00:03,  1.52it/s]
+Capturing batches (bs=6 avail_mem=94.31 GB):  25%|██▌       | 2/8 [00:01<00:03,  1.52it/s]
+Capturing batches (bs=5 avail_mem=94.30 GB):  25%|██▌       | 2/8 [00:01<00:03,  1.52it/s]
+Capturing batches (bs=5 avail_mem=94.30 GB):  50%|█████     | 4/8 [00:01<00:01,  3.46it/s]
+Capturing batches (bs=4 avail_mem=94.30 GB):  50%|█████     | 4/8 [00:01<00:01,  3.46it/s]
+Capturing batches (bs=3 avail_mem=94.29 GB):  50%|█████     | 4/8 [00:01<00:01,  3.46it/s]
+Capturing batches (bs=3 avail_mem=94.29 GB):  75%|███████▌  | 6/8 [00:01<00:00,  5.24it/s]
+Capturing batches (bs=2 avail_mem=94.28 GB):  75%|███████▌  | 6/8 [00:01<00:00,  5.24it/s]
+Capturing batches (bs=1 avail_mem=94.28 GB):  75%|███████▌  | 6/8 [00:01<00:00,  5.24it/s]
+Capturing batches (bs=1 avail_mem=94.28 GB): 100%|██████████| 8/8 [00:02<00:00,  5.83it/s]
+Capturing batches (bs=1 avail_mem=94.28 GB): 100%|██████████| 8/8 [00:02<00:00,  3.92it/s]
+[2026-11-17 07:24:32] Ignore import error when loading sglang.srt.multimodal.processors.inkling: Numba needs NumPy 2.4 or less. Got NumPy 2.5.
+[2026-11-17 07:24:32] Ignore import error when loading sglang.srt.multimodal.processors.sarashina2_vision: cannot import name 'MultimodalDataItem' from 'sglang.srt.managers.mm_utils' (/sgl-workspace/sglang/python/sglang/srt/managers/mm_utils.py)
+[transformers] Unrecognized keys in `rope_parameters` for 'rope_type'='default': {'mrope_interleaved', 'mrope_section'}
+[transformers] Unrecognized keys in `rope_parameters` for 'rope_type'='default': {'mrope_interleaved', 'mrope_section'}
+{"input_sha256": "e93409fe6e5cbec507874b5c0e89c4fe6c9abcbe80257749431f50606ae5ac41", "batch": 1, "input_tokens": 140, "output_tokens": 1, "median_ms": 30.41177988052368, "min_ms": 30.11311125010252, "max_ms": 32.22212661057711, "output_tokens_per_s": 32.881995198196876, "seconds": [0.0307426443323493, 0.030408655293285847, 0.030422771349549294, 0.03011311125010252, 0.030476706102490425, 0.030183255672454834, 0.032222126610577106, 0.03041177988052368, 0.03026651218533516, 0.030484496615827084, 0.030286096967756748, 0.03040558658540249, 0.030371415428817272, 0.030608806759119034, 0.030479024164378643]}
+{"input_sha256": "e93409fe6e5cbec507874b5c0e89c4fe6c9abcbe80257749431f50606ae5ac41", "batch": 1, "input_tokens": 140, "output_tokens": 128, "median_ms": 179.15136646479368, "min_ms": 176.79627891629934, "max_ms": 181.96398671716452, "output_tokens_per_s": 714.4796186924658, "seconds": [0.17679627891629934, 0.17897776793688536, 0.18025548849254847, 0.17915136646479368, 0.17770825885236263, 0.17976053059101105, 0.18014414887875319, 0.17776621785014868, 0.17855157982558012, 0.17932786140590906, 0.1783536532893777, 0.17928244918584824, 0.1809981856495142, 0.18196398671716452, 0.17902105767279863]}
+{"input_sha256": "5a0990578008312499f87308cc0ecaa520295569e0e2f4c45d01696e515884d9", "batch": 1, "input_tokens": 2060, "output_tokens": 1, "median_ms": 149.2749471217394, "min_ms": 147.9068621993065, "max_ms": 151.17850992828608, "output_tokens_per_s": 6.699047759062088, "seconds": [0.14962301403284073, 0.1479068621993065, 0.14829401671886444, 0.15010323561728, 0.148175286129117, 0.1483341734856367, 0.1492749471217394, 0.15045160055160522, 0.15061362367123365, 0.14881009981036186, 0.15117850992828608, 0.14876836445182562, 0.14881386421620846, 0.14989551343023777, 0.15056570898741484]}
+{"input_sha256": "5a0990578008312499f87308cc0ecaa520295569e0e2f4c45d01696e515884d9", "batch": 1, "input_tokens": 2060, "output_tokens": 128, "median_ms": 297.70600236952305, "min_ms": 295.0774226337671, "max_ms": 301.08282435685396, "output_tokens_per_s": 429.9543811048927, "seconds": [0.29507742263376713, 0.29875956755131483, 0.2965979389846325, 0.2976457988843322, 0.29902747366577387, 0.29914204869419336, 0.30108282435685396, 0.29549864772707224, 0.2990738255903125, 0.29778391029685736, 0.2972036935389042, 0.29901693761348724, 0.2973483558744192, 0.29770600236952305, 0.2962417285889387]}
+{"input_sha256": "aa3e69a0eb2196a31cf397c2833336c207742219542871a311a5e5cb264e2059", "batch": 1, "input_tokens": 3084, "output_tokens": 1, "median_ms": 207.2277069091797, "min_ms": 205.7822747156024, "max_ms": 209.92130506783724, "output_tokens_per_s": 4.825609542831371, "seconds": [0.20579732954502106, 0.20657922700047493, 0.2083543287590146, 0.2072277069091797, 0.20991044025868177, 0.20588472299277782, 0.20844252593815327, 0.20610883180052042, 0.2057822747156024, 0.20805897563695908, 0.20686738938093185, 0.20862618554383516, 0.20709729753434658, 0.20728904008865356, 0.20992130506783724]}
+{"input_sha256": "aa3e69a0eb2196a31cf397c2833336c207742219542871a311a5e5cb264e2059", "batch": 1, "input_tokens": 3084, "output_tokens": 128, "median_ms": 355.6860266253352, "min_ms": 352.5606784969568, "max_ms": 359.6872640773654, "output_tokens_per_s": 359.86794649886497, "seconds": [0.3596872640773654, 0.35836206283420324, 0.35712622851133347, 0.3558825124055147, 0.3560627484694123, 0.3531699404120445, 0.35521464608609676, 0.3552637891843915, 0.3525606784969568, 0.35582314617931843, 0.3556860266253352, 0.35437933914363384, 0.35381302516907454, 0.3581466479226947, 0.3547792099416256]}

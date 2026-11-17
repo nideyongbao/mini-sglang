@@ -1,5 +1,7 @@
 # Qwen38 strict 默认模式：CUDA graph 精度与独占性能
 
+> 后续补充：[相同输入、chunk512、单并发离线/HTTP复测](qwen38-single-concurrency-report.md)。
+
 本轮已达到：默认strict、CUDA graph下128步主矩阵4992/4992完整logits逐位一致，fast可选；严格模式相对fast延迟增加27.6%–45.4%。原服务已恢复，strict测试服务在本机31039可用。逐位一致参考采用双方相同的确定性QSA top-k，原top-k SGLang另列性能基线。
 
 日期 2026-11-17，分支 `feat/qwen38-next-local`。本轮把此前诊断替换组合迁为正式模型配置；API/CLI 默认 `strict`，显式 `fast` 才启用近似快速核。
