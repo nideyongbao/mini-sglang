@@ -122,6 +122,78 @@ Mini CLI 使用原生 graph 档位 1/2/4/8，参考使用精确 batch 1–8（�
 
 原服务使用 `--rm`，停止后容器会删除，因此恢复通过原脚本 `/shard_data/brooksli/workspace/0826/deploy.sh` 重建同名 `sglang-qwen38-dflash2`。已比较停服前与恢复后的完整 `ServerArgs`，差异为空；最终 `/health`、`/v1/models`、`/metrics` 均返回 200，模型别名为 `qwen`，见 [恢复记录](../benchmark/qwen38/results/2026-11-17/service-restoration.json)。保留原 DFlash2、端口 8000、模型别名 qwen、metrics 配置和已有监控。首次尝试遇到离线参数名及自动删除容器问题，修正后重新完成全部正式测量；首次尝试数据未进入结果表。
 
+## 补充：两条模块/算子路径为什么不同
+
+本节为 2026-11-17 对已测代码、镜像内源码和原始结果的复核。**属于源码分派审计及已有测量的算术分析，不是新增的逐算子 GPU profile 或消融实验。** 本次未启动测试 GPU 服务、未停止现有业务服务。[分析数据及参考源码哈希](../benchmark/qwen38/results/2026-11-17/path-analysis.json)可用于核对。
+
+### 模型结构相同，执行实现不同
+
+两边都是 embedding → 8 层（6 GDN / 2 QSA，各带 HC 和 MoE，第 2 层带 PLE）→ 最终 HC mixer → LM head。均保留 FP8 专家、QSA 稀疏选择和 PLE；性能测试使用 context=4096，**没有命中 mini 的 ≤2048 dense 等价捷径**。没有减少层数、专家 top-k 或输出长度，也没有启用推测解码。
+
+| 模块 | 当前 SGLang 路径 | 当前 Mini-SGLang 路径 | 关键差异与边界 |
+|---|---|---|---|
+| HC mix，逻辑上 17 次/forward | `GroupedGemmaRMSNorm` → `_mix_compute`（torch.compile 的 Linear/SiLU/Linear/sigmoid/mul/mean） | `tiny_hc_mix`：group norm、两次低秩投影、gate、mean 融为一个 Triton kernel | hidden=32、HC×hidden=128 不满足参考融合核的形状条件；mini 特化本次 4×32/rank=4 |
+| HC combine，16 次/forward | `_combine_compute`：Linear + gate + residual，局部 torch.compile | `tiny_hc_combine` 单个 Triton kernel | 参考 JIT combine 要求总宽度可被 2048 整除，本例不满足；数值归约与中间舍入可能不同 |
+| PLE 分组归一化，3 次/forward | group_size=32 不满足参考 JIT 的 512 整除条件，走 PyTorch FP32 mean/rsqrt/mul/cast 链 | 自定义 `grouped_norm` Triton kernel | 不改变 RMSNorm 公式；减少中间张量和 kernel 分拆 |
+| GDN 输入投影 | BF16 且无 LoRA 时装载后合并 QKVZ/BA；M≤1024 可走一次 `bf16_gemm_dispatch` | `in_proj_qkvz` 和 `in_proj_ba` 两次 Linear，再做 fused layout preparation | **这一项参考端反而融合得更多**，不能概括为 mini 的所有层都更快 |
+| GDN prefill，6 层 | `causal_conv1d_fn` → Q/K/V split → `fused_gdn_gating` → `chunk_gated_delta_rule` | 复用同一 SGLang causal-conv、gating 和 chunk GDN 核心 | 核心算法/内核家族相同，metadata、布局准备、外围 norm/gate 不完全相同；两边 SSM state 都是 FP32 |
+| GDN decode | `causal_conv1d_update` → `fused_recurrent_gated_delta_rule_packed_decode` → gated RMSNorm(sigmoid) | 本地 causal-conv update → `gdn_decode.packed_decode` → `gated_rmsnorm_(sigmoid)` | 同样的 recurrent 公式，但本地独立 Triton 实现，不能声称 binary/kernel 完全相同 |
+| QSA QKV/Norm/RoPE | QKV projection → `fused_qk_gemma_rmsnorm_rope_gate` → output fused sigmoid-mul | QKV projection → `prepare_qk_gate` → `apply_attention_gate_` | 双方都有融合准备和输出门，不是“参考全部 eager、mini 全部 fused” |
+| QSA indexer | fused prep/compress 条件分派；CUDA+TileLang 可用时使用 TileLang MQA score；fast top-k/块展开 | PyTorch FP32 `einsum` + ReLU/head-sum；复用参考 `qsa_fast_topk` / `expand_qsa_block_indices` | score、norm/rope、压缩和归约实现不同；不能保证选择块索引逐项相同。这里只审计源码分派，未新增捕获运行时全部 indexer 中间值 |
+| QSA prefill，2 层 | 首 chunk：`sparse_gqa_fwd_interface_triton`；后续 chunk：先收集全上下文 KV，再 `sparse_gqa_fwd_interface_triton_ck` | 页表映射物理位置后，`qsa._sparse` 直接读取分页 KV | 后续 chunk 的 gather/cat 和 host readback 是明确差异；attention online-softmax 思路相同，tile/循环/掩码细节不同 |
+| QSA decode | valid-count/cu-seqlens + compact KV gather → patched FA3 varlen | length/cumsum + `_gather` → `flash_attn_varlen_func(ver=3)` | 最终 attention 同为 FA3，准备和 gather 路径不同；不是拿 mini FA3 对参考 FA4 做性能对比 |
+| Routed MoE，8 层 | TopK/FusedMoE runner → align → 2 次 `invoke_fused_moe_kernel` + activation + reduce | mini top-k/align → 同一 `invoke_fused_moe_kernel` 两次 + activation + reduce | 同为 dynamic block-FP8 W8A8；当前默认 tile 配置相同，不能把优势归因于换了精度更低的 GEMM |
+| Shared expert | BF16 gated MLP + sigmoid shared gate | BF16 gated MLP + sigmoid shared gate | 模型功能相同，包装/elementwise fusion 不同 |
+| PLE embedding/conv | FP8 table gather 输出 BF16，再乘 scale；状态管理支持更广泛 batch/缓存场景；部分 decode 有融合快路 | 加载时缓存 FP8→BF16 table，lookup 后乘原 scale；请求槽位历史 + PyTorch depthwise conv | FP8→BF16 本身可精确表示；此处存储差异不是额外 FP8 量化损失。参考端也有 mini 未实现的 PLE 优化 |
+| LM head / greedy | 选最后 hidden → BF16 matmul → logits 转 FP32 → `torch.argmax` | 选最后 hidden → BF16 `F.linear` → `torch.argmax` | BF16→FP32 转换本身不改变已有数值次序。两边 greedy 规则一致，差异不能简单归因于随机采样/不同 tie-break |
+| 离线调用链 | `Engine.generate` → TokenizerManager → scheduler 子进程 → 返回结果 | `LLM.generate` 直接驱动本进程 Scheduler | 测的是 API E2E，框架/IPC 开销在内；不是纯 CUDA model.forward 对比 |
+
+上表次数是模型每次 forward 的逻辑调用次数，不是 GPU trace 中精确的总 kernel launch 数；torch.compile 的分拆取决于形状和编译结果。
+
+### 为什么 tiny 模型容易出现较大的比例差距
+
+1. **HC/Norm 的参考快路没有覆盖本次小形状。** HC group=32、总宽=128；参考 grouped norm 要求 group_size 为 512 的倍数，HC fused mix/combine 要求总宽为 2048 的倍数；部分 CuTe mix 还要求 SM100。mini 针对 tiny 尺寸将 17 次 mix（含 norm）和 16 次 combine 各做成单核。这是源码可确认的差异；精确节省了多少毫秒尚无同条件消融数据。
+2. **QSA chunk-prefill 存在额外数据搬运和同步。** 参考 `forward_extend` 对已有 prefix 的请求执行 `req_pool_indices.tolist()`、完整上下文 K/V 的 `index_select`/`cat`；随后 chunk kernel wrapper 用 `int((cu_q[1:] - cu_q[:-1]).max().item())` 读取 GPU scalar 来决定 launch grid。mini 直接按物理页表读取 KV、用已知 token 数决定 grid。对 hidden=32 的小模型，这类固定开销可能占较大比例；并非 attention 数学工作量减半。
+3. **参考端并不是所有算子都慢。** GDN 投影合并、QSA indexer 专用 CUDA/TileLang 路径、PLE decode 融合等都可能有利于参考端。MoE 日志提示 tiny 形状缺少调优配置，但代码核对显示它回退的 block-FP8 配置正好与 mini 一致：M=64/N=32/K=32、GROUP_SIZE_M=32、warps=4、stages=3。所以“缺少 MoE 调优文件”不能独立解释本次加速。
+4. **HTTP 比值还混入了调度和请求到达方式。** HTTP 请求经过独立线程并发提交、动态组 batch、队列和 detokenizer；两边 graph 档位也不同。离线/HTTP 输入数据不同（随机 token vs 重复文本），token 数也不同，不能把 HTTP 比值减去离线比值当成纯网络层优化。
+
+已有时间数据可做以下辅助分解：
+
+| 输入/并发 | 1-token：SGLang / mini ms | 128-token 减 1-token：SGLang / mini ms |
+|---|---:|---:|
+| 128 / 1 | 30.10 / 13.48 | 144.50 / 114.79 |
+| 128 / 8 | 60.39 / 35.96 | 142.75 / 137.05 |
+| 3072 / 8 | 1337.65 / 648.95 | 307.71 / 157.03 |
+
+例如 3072/8 的总耗时差约 839.38 ms，其中 1-token 测量差约 688.70 ms，算术占比约 82%。这表明巨大差距已出现在预填充及框架开销所在阶段。但两次独立测量的中位数相减不等于实测纯 decode 时间，输出长度改变还会影响调度；这个 82% **不是**逐核 profiler 给出的归因比例。
+
+### 为什么精度不是 100%
+
+模型公式相同不意味着逐位结果相同。本分支重新实现/融合了 HC、归一化、GDN decode、QSA prefill 和 indexer；FP32 归约树、BF16 中间落盘/舍入位置、FMA/指数实现、矩阵形状和 batch 组织都可能改变最终 logits。MoE router top-k 与 QSA top-k 也是离散选择点，小数值变化可能改变路由；**当前没有逐层捕获证据证明它们实际在哪个样本发生变化**。
+
+确定的证据来自相同历史的输出比较。主测试长上下文 prompt=2、step=0：
+
+| 候选 token | SGLang logprob | mini logprob |
+|---:|---:|---:|
+| 14948（SGLang 选择） | -12.20106125 | -12.20203590 |
+| 88089（mini 选择） | -12.20106125 | -12.20105934 |
+
+参考端两者并列，mini 中 88089 高出 0.0009765625。两边都是 argmax；输入分布变了，结果自然可能不同。不能把“命中参考最高概率并列集合”误读为“logits 完全相同”或“逐 token 已经 100% 对齐”。
+
+主测试自由生成共有 7 条序列出现首次分歧：其中 5 条首次分歧的两个候选在参考端 logprob 并列，另 2 条参考间隔分别为 0.0009765625 和 0.001953125。分歧发生后，两边把不同 token 送入下一步，PLE n-gram、GDN 状态、QSA/KV 历史随之不同；后续 token 不再是在相同输入上比较。因此自由生成 267/320（83.4%）不能解释为“16.6% 的算子计算错误”，也不能因此忽略真实数值差异。
+
+Teacher forcing 将历史对齐后，主测试严格 top-1=98/100，参考并列集合命中=100/100；但补充 padded-graph 长上下文是 28/30 和 29/30，说明**并非所有测试差异都能用参考端精确并列解释**。小模型随机权重、248320 词表以及 BF16 量化后的候选近似并列共同使 argmax 较敏感。这不是正式权重任务精度认证。
+
+当前短上下文精度测试的 mini 上限为 2048，使用 QSA→dense 等价路径，而参考始终走 QSA；长上下文测试双方走 QSA。正式性能测试两边均为 4096，故上述短上下文捷径没有用于获得性能表中的优势。
+
+### 已知与尚未证明的界限
+
+- 已确认：两边具体模块分派、参考 tiny 形状融合限制、QSA 后续 chunk 的 gather/host readback、MoE 相同核心与默认 tile、两边 greedy 均为 argmax、首次输出分歧处的概率间隔。
+- 尚未证明：第一个发生误差的中间张量属于哪层/哪一核、HC/QSA/调度分别贡献多少毫秒、MoE/QSA top-k 是否在每个分歧样本保持一致。因此不能给出“某一个算子造成全部精度差异”或“某项优化贡献了全部 2 倍加速”的结论。
+- 若继续要求严格数值对齐，需要相同固定输入、相同 prefill/decode 和 batch 形状，逐层抓取 HC mix、GDN/QSA、router/top-k、PLE、最终 hidden 和完整 logits，再逐项换回参考核做消融。只强行改 argmax tie-break 不能修复上游数值差异。
+
+参考代码位置（固定在报告所列镜像与 commit，以下路径相对于 SGLang `python/sglang/`）：`srt/layers/hyperconnection.py`、`srt/layers/hc_mix_triton.py`、`srt/layers/attention/qwen_sparse_attn_backend.py`、`srt/layers/attention/qsa/{sparse_attn,qsa_indexer,mqa}.py`、`srt/layers/attention/linear/kernels/gdn_triton.py`、`srt/layers/moe/moe_runner/triton_utils/fused_moe_triton_config.py`、`srt/layers/{sampler,logits_processor}.py`、`srt/entrypoints/engine.py`。mini 对应源码为 `models/qwen3_8*.py`、`kernel/triton/qwen38.py`、`kernel/triton/qsa.py`、`attention/gdn.py`、`kernel/triton/gdn_decode.py`、`engine/sample.py`。
+
 ## 限制与结果文件
 
 支持范围为目标本地 tiny checkpoint 的 TP=1、纯文本、BF16 激活、block-FP8 路由专家。未验证 4096 以上上下文、其他 GPU、真实大模型 checkpoint、MTP/推测解码、视觉和多 GPU；不支持前缀 PLE/QSA 状态复用，强制 naive cache。PLE embedding 查表保存 BF16 副本并在 lookup 时应用原 scale，专家 GEMM 保留 FP8。

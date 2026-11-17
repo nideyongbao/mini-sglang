@@ -1,0 +1,111 @@
+{
+  "method": "Read-only source dispatch audit plus arithmetic on saved measurements; no new GPU profiling or ablation.",
+  "performance_difference_proxies": [
+    {
+      "input_tokens": 128,
+      "batch": 1,
+      "sglang_one_token_ms": 30.095824040472507,
+      "mini_one_token_ms": 13.47807515412569,
+      "sglang_increment_127_ms": 144.50159575790167,
+      "mini_increment_127_ms": 114.79426268488169,
+      "one_token_gap_fraction": 0.3587203342872177
+    },
+    {
+      "input_tokens": 128,
+      "batch": 8,
+      "sglang_one_token_ms": 60.38893014192581,
+      "mini_one_token_ms": 35.957371816039085,
+      "sglang_increment_127_ms": 142.7450068295002,
+      "mini_increment_127_ms": 137.04640697687864,
+      "one_token_gap_fraction": 0.8108672440795103
+    },
+    {
+      "input_tokens": 3072,
+      "batch": 8,
+      "sglang_one_token_ms": 1337.6541044563055,
+      "mini_one_token_ms": 648.950731381774,
+      "sglang_increment_127_ms": 307.70833883434534,
+      "mini_increment_127_ms": 157.03336242586374,
+      "one_token_gap_fraction": 0.8204921815039847
+    }
+  ],
+  "first_free_divergences": [
+    {
+      "case": "accuracy-short",
+      "prompt": 0,
+      "input_tokens": 4,
+      "step": 9,
+      "mini_token": 224851,
+      "reference_token": 75104,
+      "reference_logprob_gap": 0.0
+    },
+    {
+      "case": "accuracy-short",
+      "prompt": 4,
+      "input_tokens": 16,
+      "step": 5,
+      "mini_token": 142427,
+      "reference_token": 85765,
+      "reference_logprob_gap": 0.0
+    },
+    {
+      "case": "accuracy-short",
+      "prompt": 5,
+      "input_tokens": 63,
+      "step": 1,
+      "mini_token": 131347,
+      "reference_token": 73516,
+      "reference_logprob_gap": 0.0
+    },
+    {
+      "case": "accuracy-short",
+      "prompt": 7,
+      "input_tokens": 511,
+      "step": 13,
+      "mini_token": 161473,
+      "reference_token": 128337,
+      "reference_logprob_gap": 0.0
+    },
+    {
+      "case": "accuracy-long",
+      "prompt": 0,
+      "input_tokens": 15,
+      "step": 10,
+      "mini_token": 90862,
+      "reference_token": 206006,
+      "reference_logprob_gap": 0.0009765625
+    },
+    {
+      "case": "accuracy-long",
+      "prompt": 2,
+      "input_tokens": 2048,
+      "step": 7,
+      "mini_token": 186785,
+      "reference_token": 125486,
+      "reference_logprob_gap": 0.0
+    },
+    {
+      "case": "accuracy-long",
+      "prompt": 5,
+      "input_tokens": 4000,
+      "step": 14,
+      "mini_token": 17234,
+      "reference_token": 210827,
+      "reference_logprob_gap": 0.001953125
+    }
+  ],
+  "reference_source_sha256": {
+    "qwen4_exp.py": "a3981e148bc9ede4b84dea700f40831f86211cea29b817e8cc8feca1066e9f72",
+    "hyperconnection.py": "230f482e45903e3055f47c5b3f072a80996eaefa586fb4802a5c7e379dc74930",
+    "hc_mix_triton.py": "c3bed72a7bda699ade334ec51c1fca190497d5068efe9ba424840f19c82d0af6",
+    "qwen_sparse_attn_backend.py": "95101334f0b135228b6677bbbabba9f801cd7fc87446cd3dea1883367260080b",
+    "qsa/sparse_attn.py": "f3801cc37453278e884873a821350def23c58453eb91c56f2c96d8f62a3709f5",
+    "qsa/qsa_indexer.py": "a916967133fdb6b06e6094bfe3a9aa1ba275bf7d858d2f5c1bb39f8d0149461f",
+    "qsa/mqa.py": "84a52bb2cf61411862fcd328324cad1d05be264009bed2c12c027b315eeb6f19",
+    "linear/kernels/gdn_triton.py": "c3dfaf1eb04c035df2c7374a6714aeaa66c8a49b6573f8f28b100b9e7e063c82",
+    "triton_utils/fused_moe_triton_config.py": "022c8aa47972dd975ebf7be9c6d04ac4c60604cf705cf80c9b38e45973193d09",
+    "sampler.py": "85f797fc081ac8e81bba8520fb0d875fceb574bcc48379451e34c286642f11d3",
+    "logits_processor.py": "8df0b86bcf2dfc2bea4f2bae82433860ed88233616c923a5443602bca9378a11",
+    "engine.py": "50aba0ce9763a3ff574ccc4be9ebaaa5d3e741045ed1d42a10f6a906c8b4b773"
+  }
+}
